@@ -1,0 +1,80 @@
+/* Layout container */
+.app-layout {
+  min-height: 100vh;
+}
+
+/* Header always on top, doesn’t get overlapped */
+.app-header {
+    height: var(--header-height);
+    flex-shrink: 0;
+    background: #ffffff;
+}
+
+/* Main layout area */
+.app-body {
+    flex-grow: 1;
+    min-height: 0; 
+}
+
+/* Sidebar (fixed width) */
+.app-sidenav {
+    background: #f8f9fa;
+}
+
+/* Main content */
+.app-content {
+    flex-grow: 1;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+/* Side nav title */
+.sidenav-title {
+    font-weight: 600;
+    color: #444;
+}
+
+.sidenav {
+    width: 220px;
+    background: #ffffff;
+}
+
+/* Default link style */
+.sidenav .nav-link {
+    color: #555;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+/* Hover (light) */
+.sidenav .nav-link:hover {
+    background-color: rgba(13, 110, 253, 0.08); /* light bootstrap primary tint */
+    color: var(--primary-color);
+}
+/* Active State */
+.sidenav .nav .nav-link.active {
+    background-color: rgba(13, 110, 253, 0.08) !important;
+    color: var(--primary-color) !important;
+    border-left: 3px solid var(--primary-color) !important;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+/* Active + Hover */
+.sidenav .nav .nav-link.active:hover {
+    background-color: rgba(13, 110, 253, 0.12) !important;
+    color: var(--primary-color) !important;
+}
+
+/* Active + Focus */
+.sidenav .nav .nav-link.active:focus {
+    background-color: rgba(13, 110, 253, 0.10) !important;
+    box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.25);
+}
+
+.landing-wrapper {
+  min-height: calc(100vh - var(--header-height));
+  padding-top: 20px; /* optional, for better spacing */
+}

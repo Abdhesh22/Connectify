@@ -1,0 +1,815 @@
+/* ==============================
+   ROOT
+   ============================== */
+.meet-root {
+  height: 100vh;
+  width: 100vw;
+  background: var(--bg-dark);
+  color: var(--text-light);
+  font-family: var(--font-main);
+  display: flex;
+  flex-direction: column;
+}
+
+/* ==============================
+   HEADER
+   ============================== */
+.meet-header {
+  height: var(--header-height);
+  padding: 0 20px;
+  border-bottom: 1px solid var(--border-light);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.meet-header-left,
+.meet-header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.meet-logo-circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--bg-primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+}
+
+.meet-title {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.meet-subtitle {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.meet-header-pill {
+  padding: 6px 12px;
+  font-size: 13px;
+  border-radius: 100px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border-mid);
+}
+
+/* ==============================
+   MAIN LAYOUT
+   ============================== */
+.meet-main {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+/* ==============================
+   VIDEO GRID
+   ============================== */
+.meet-stage {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+}
+
+.video-tile {
+  position: relative;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.video-tile--large {
+  grid-row: span 2;
+}
+
+.video-placeholder {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-tile);
+}
+
+.avatar-circle {
+  width: var(--tile-avatar-size);
+  height: var(--tile-avatar-size);
+  border-radius: 50%;
+  background: #3a3c3f;
+  border: 2px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.video-tile-footer {
+  padding: 8px 10px;
+  background: rgba(0, 0, 0, 0.45);
+  font-size: 13px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.video-status {
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+}
+
+.video-status--mic-on {
+  background: var(--mic-on-bg);
+  color: var(--mic-on-text);
+}
+
+.video-status--mic-off {
+  background: var(--mic-off-bg);
+  color: var(--mic-off-text);
+}
+
+/* ==============================
+   CONTROL BAR
+   ============================== */
+.meet-controls {
+  margin-top: 12px;
+  padding: 10px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.meet-controls-center {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.control-btn {
+  width: var(--btn-size);
+  height: var(--btn-size);
+  border-radius: 50%;
+  border: none;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #111827;
+  font-size: 20px;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.control-btn:hover {
+  transform: scale(1.1);
+}
+
+.control-btn-right-active {
+  color: var(--bg-primary);
+}
+
+.control-btn--danger {
+  background: var(--bg-danger);
+  color: white;
+}
+
+.control-btn--pill {
+  padding: 6px 16px;
+  background: #ffffff;
+  border-radius: 30px;
+  display: flex;
+  gap: 6px;
+}
+
+/* ==============================
+   CHAT PANEL
+   ============================== */
+.chat-panel {
+  width: 320px;
+  background: #181a1c;
+  border-left: 1px solid var(--border-light);
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-header {
+  padding: 14px;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.chat-title {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.chat-subtitle {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* Messages */
+.chat-messages {
+  flex: 1;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+}
+
+.chat-message {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.chat-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.chat-bubble {
+  padding: 8px 12px;
+  background: var(--bg-bubble);
+  border-radius: var(--radius-md);
+  max-width: 90%;
+  font-size: 14px;
+}
+
+.chat-bubble--me {
+  background: var(--bg-primary);
+}
+
+/* Chat input */
+.chat-input-wrapper {
+  padding: 12px;
+  display: flex;
+  gap: 8px;
+  border-top: 1px solid var(--border-light);
+}
+
+.chat-input {
+  flex: 1;
+  padding: 10px 14px;
+  border-radius: var(--radius-xl);
+  border: none;
+  background: var(--bg-bubble);
+  color: white;
+  font-size: 14px;
+}
+
+.chat-send-btn {
+  padding: 8px 16px;
+  border-radius: var(--radius-xl);
+  background: var(--bg-primary);
+  color: white;
+  font-weight: 500;
+  border: none;
+}
+
+
+/* PANEL ROOT */
+.people-panel {
+  width: 320px;
+  background: #181a1c;
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-direction: column;
+}
+
+/* HEADER */
+.people-header {
+  padding: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.people-title {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.people-subtitle {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.add-people-icon {
+  font-size: 18px;
+  cursor: pointer;
+  color: #cbd5e1;
+}
+
+/* LIST */
+.people-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 0;
+}
+
+/* ITEM */
+.people-item {
+  padding: 10px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background 0.15s ease;
+}
+
+.people-item:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* LEFT SIDE */
+.people-item-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.people-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: #303236;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  color: #fff;
+  font-size: 16px;
+}
+
+/* NAME + ROLE */
+.people-meta {
+  display: flex;
+  flex-direction: column;
+}
+
+.people-name {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.people-role {
+  font-size: 11px;
+  background: rgba(79, 70, 229, 0.25);
+  padding: 2px 6px;
+  border-radius: 6px;
+  margin-top: 2px;
+  color: #a5b4fc;
+}
+
+/* STATUS ICONS */
+.people-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mic-on { color: #34d399; }
+.mic-off { color: #ef4444; }
+
+.cam-on { color: #60a5fa; }
+.cam-off { color: #ef4444; }
+
+.people-more {
+  font-size: 18px;
+  cursor: pointer;
+  color: #cbd5e1;
+}
+
+
+.meet-controls-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Base style for right side small buttons */
+.meet-right-btn {
+  width: var(--btn-size);
+  height: var(--btn-size);
+  border-radius: 50%;
+  background: transparent;
+  border: none;
+  color: #d1d5db;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+  background: rgba(255, 255, 255, 0.08);
+  font-size: 20px;
+}
+
+/* Hover circle (like Google Meet) */
+.meet-right-btn:hover {
+  background: rgba(188, 188, 188, 0.08);
+}
+
+/* Active State (like Meet: purple tint or highlight color) */
+.meet-right-btn--active {
+  color: var(--bg-primary); /* Your primary purple color */
+  background: rgba(79, 70, 229, 0.15);
+}
+
+.meet-right-btn--active:hover {
+  background: rgba(79, 70, 229, 0.25);
+}
+
+.video-tile--more {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #1f2023;
+  border-radius: 12px;
+  border: 1px dashed rgba(255, 255, 255, 0.15);
+  color: #cbd5e1;
+  font-size: 20px;
+  font-weight: 500;
+}
+
+.video-more-wrapper {
+  padding: 20px;
+  text-align: center;
+  opacity: 0.9;
+}
+
+/* ==============================
+   PARTICIPANT GRID DYNAMIC LAYOUT
+   ============================== */
+
+/* Wrapper grid injected by Participant component */
+.participant-grid {
+  flex: 1;
+  height: 100%;
+  display: grid;
+  grid-auto-rows: 1fr;
+}
+
+
+/* ------------------------------
+   1 USER → FULL SCREEN
+--------------------------------- */
+.participant-grid.grid-one {
+  grid-template-columns: 1fr !important;
+  grid-auto-rows: 1fr;
+}
+
+.participant-grid.grid-one .video-tile {
+  height: calc(100vh - var(--header-height) - 140px); 
+}
+
+
+
+/* ------------------------------
+   2 USERS → SPLIT SCREEN
+--------------------------------- */
+.participant-grid.grid-two {
+  grid-template-columns: 1fr 1fr;
+  grid-auto-rows: 1fr;
+}
+
+/* ------------------------------
+   3+ USERS → AUTO GRID + SCROLL
+--------------------------------- */
+.participant-grid.grid-multi {
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  grid-auto-rows: minmax(240px, 1fr);
+  overflow-y: auto;
+  max-height: calc(100vh - var(--header-height) - 120px); /* FIX */
+}
+
+
+
+/* scrollbars visually soft */
+.participant-grid.grid-multi::-webkit-scrollbar {
+  width: 8px;
+}
+.participant-grid.grid-multi::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.15);
+  border-radius: 4px;
+}
+.participant-grid.grid-multi::-webkit-scrollbar-track {
+  background: rgba(255,255,255,0.05);
+}
+
+.camera-wrapper,
+.camera-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+
+/* ----------------------------------------------------
+   PROFESSIONAL PARTICIPANT GRID IMPROVEMENTS
+---------------------------------------------------- */
+
+.enhance-ui {
+  padding: 8px;
+  gap: 16px !important;
+}
+
+/* Beautiful video tile */
+.modern-tile {
+  border-radius: 14px;
+  overflow: hidden;
+  background: #1a1c1e;
+  border: 1px solid rgba(255,255,255,0.05);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+/* Hover elevation */
+.modern-tile:hover {
+  transform: scale(1.02);
+  border-color: rgba(255,255,255,0.15);
+}
+
+/* Video/Avatar area */
+.video-content {
+  flex: 1;
+  background: #2e3033;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Professional avatar style */
+.avatar-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatar-circle {
+  width: 78px;
+  height: 78px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #4f46e5, #6366f1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid rgba(255,255,255,0.4);
+  color: white;
+  font-weight: 700;
+  font-size: 26px;
+  letter-spacing: 0.5px;
+}
+
+/* Webcam container full fit */
+.camera-container,
+.camera-container video,
+.camera-container > div {
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+  object-fit: cover;
+}
+
+/* Footer bar */
+.video-footer {
+  padding: 10px 14px;
+  background: rgba(0,0,0,0.55);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  backdrop-filter: blur(8px);
+}
+
+/* Name */
+.video-name {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* Status badge */
+.status-badge {
+  padding: 3px 8px;
+  font-size: 11px;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+.mic-on {
+  background: rgba(16, 185, 129, 0.25);
+  color: #34d399;
+}
+
+.mic-off {
+  background: rgba(239, 68, 68, 0.25);
+  color: #f87171;
+}
+
+/* +N more tile */
+.more-tile {
+  backdrop-filter: blur(5px);
+  background: rgba(255,255,255,0.03);
+  border: 1px dashed rgba(255,255,255,0.2);
+}
+
+.more-box {
+  margin: auto;
+  font-size: 22px;
+  font-weight: 600;
+  opacity: 0.8;
+}
+
+
+/* ----------------------------------------------------
+   PERFECT RESPONSIVE GRID BEHAVIOR
+---------------------------------------------------- */
+
+.participant-grid.grid-one {
+  grid-template-columns: 1fr;
+}
+
+.participant-grid.grid-two {
+  grid-template-columns: 1fr 1fr;
+}
+
+.participant-grid.grid-multi {
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  overflow-y: auto;
+}
+
+/* mobile responsiveness */
+@media (max-width: 600px) {
+  .participant-grid.grid-two,
+  .participant-grid.grid-multi {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* ============================================================
+   1) VERY LARGE DESKTOPS  (1440px and above)
+   ============================================================ */
+@media (min-width: 1440px) {
+
+
+  .chat-panel,
+  .people-panel {
+    width: 360px;
+  }
+
+  .meet-controls {
+    padding: 14px 40px;
+  }
+}
+
+/* ============================================================
+   2) STANDARD LAPTOPS  (1024px → 1439px)
+   ============================================================ */
+@media (max-width: 1439px) and (min-width: 1024px) {
+
+  .chat-panel,
+  .people-panel {
+    width: 300px;
+  }
+}
+
+/* ============================================================
+   3) TABLETS LANDSCAPE  (900px → 1023px)
+   ============================================================ */
+@media (max-width: 1023px) and (min-width: 900px) {
+  .meet-header {
+    padding: 10px 16px;
+  }
+
+  .chat-panel,
+  .people-panel {
+    width: 240px;
+  }
+}
+
+/* ============================================================
+   4) TABLETS PORTRAIT / LARGE PHONES LANDSCAPE (600px → 899px)
+   ============================================================ */
+@media (max-width: 899px) and (min-width: 600px) {
+  .meet-header {
+    height: auto;
+    padding: 10px;
+    flex-direction: column;
+    text-align: center;
+    gap: 6px;
+  }
+
+
+  .meet-controls {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+  }
+
+  .control-btn {
+    width: 42px;
+    height: 42px;
+  }
+
+  /* Hide chat + people to maximize video */
+  .chat-panel,
+  .people-panel {
+    display: none;
+  }
+}
+
+/* ============================================================
+   5) LARGE MOBILE (iPhone 11/12/13 Pro Max etc.) (480px → 599px)
+   ============================================================ */
+@media (max-width: 599px) and (min-width: 480px) {
+  .meet-header {
+    flex-direction: column;
+    padding: 10px;
+    gap: 4px;
+  }
+  .avatar-circle {
+    width: 60px;
+    height: 60px;
+    font-size: 18px;
+  }
+
+  .meet-controls {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .control-btn {
+    width: 38px;
+    height: 38px;
+  }
+
+  .chat-panel,
+  .people-panel {
+    display: none;
+  }
+}
+
+/* ============================================================
+   6) SMALL MOBILE / iPHONE X / Small Android (0px → 479px)
+   ============================================================ */
+@media (max-width: 479px) {
+  .meet-header {
+    flex-direction: column;
+    padding: 8px;
+    gap: 4px;
+    text-align: center;
+  }
+
+  .meet-title {
+    font-size: 14px;
+  }
+
+  .video-tile {
+    border-radius: 10px;
+  }
+
+  .avatar-circle {
+    width: 50px;
+    height: 50px;
+    font-size: 16px;
+  }
+
+  .meet-controls {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .control-btn {
+    width: 34px;
+    height: 34px;
+  }
+
+  .meet-right-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
+  }
+
+  .chat-panel,
+  .people-panel {
+    display: none;
+  }
+}

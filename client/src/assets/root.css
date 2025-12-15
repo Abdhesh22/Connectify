@@ -1,0 +1,43 @@
+/* ==============================
+   ROOT VARIABLES
+   ============================== */
+:root {
+  /* Colors */
+  --bg-dark: #0c0c0d;
+  --bg-card: #1a1c1e;
+  --bg-tile: #2a2c2f;
+  --bg-bubble: #2c2f33;
+  --bg-primary: #4f46e5;
+  --bg-secondary: #a19cf7;
+  --bg-danger: #ef4444;
+
+  --text-light: #e9eaec;
+  --text-muted: #9ca3af;
+
+  --border-light: rgba(255, 255, 255, 0.08);
+  --border-mid: rgba(255, 255, 255, 0.12);
+
+  --primary-color : #4f46e5;
+
+  /* Video status */
+  --mic-on-bg: rgba(16, 185, 129, 0.2);
+  --mic-on-text: #34d399;
+  --mic-off-bg: rgba(239, 68, 68, 0.2);
+  --mic-off-text: #fca5a5;
+
+  /* Sizes */
+  --header-height: 60px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 12px;
+  --radius-xl: 20px;
+
+  --tile-avatar-size: 70px;
+
+  /* Buttons */
+  --btn-size: 48px;
+
+  /* Fonts */
+  --font-main: "Inter", system-ui, sans-serif;
+
+}
