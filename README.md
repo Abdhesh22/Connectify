@@ -1,50 +1,18 @@
-# Connectify
-Real-Time Video Chat Platform
+# Connectify  
+## Real-Time Video Chat Platform
 
+Connectify is a scalable and modular **real-time video chat platform** built using **NestJS**.  
+The project follows clean architecture principles with a strong focus on maintainability,
+separation of concerns, and production-ready best practices.
 
-src/
- ├── config/                 # Environment configs (database, auth, etc.)
- ├── common/
- │    ├── constants/         # Global constants
- │    ├── decorators/        # Custom decorators
- │    ├── exceptions/        # Custom exceptions
- │    ├── filters/           # Exception filters
- │    ├── guards/            # Auth guards, RBAC guards
- │    ├── interceptors/      # Logging, Transform, Timeout etc.
- │    ├── middlewares/       # Custom middlewares
- │    ├── pipes/             # Validation pipes
- │    └── utils/             # Helper functions
- │
- ├── modules/                # All feature modules here
- │    ├── user/
- │    │    ├── user.controller.ts
- │    │    ├── user.service.ts
- │    │    ├── user.module.ts
- │    │    ├── dto/
- │    │    ├── entity/
- │    │    └── repository/
- │    │
- │    ├── auth/
- │    │    ├── auth.controller.ts
- │    │    ├── auth.service.ts
- │    │    ├── strategies/ (JWT, Local, Refresh)
- │    │    ├── guards/
- │    │    ├── dto/
- │    │    └── auth.module.ts
- │    │
- │    ├── product/
- │    │    ├── product.controller.ts
- │    │    ├── product.service.ts
- │    │    ├── dto/
- │    │    ├── schemas/      # If using MongoDB (Mongoose)
- │    │    └── product.module.ts
- │
- ├── database/
- │    ├── mongoose.config.ts / typeorm.config.ts
- │    ├── seeds/
- │    └── migrations/
- │
- ├── app.module.ts           # Root module
- ├── main.ts                  # Application entry point
- │
- └── assets/                 # Static files (optional)
+---
+
+## 🧩 Architecture Overview
+
+- **Modular, feature-based architecture**
+- **Clean separation of concerns**
+- **Reusable common layer** (guards, pipes, interceptors, filters, decorators)
+- **JWT-based authentication and authorization**
+- **MongoDB integration using Mongoose**
+
+----
