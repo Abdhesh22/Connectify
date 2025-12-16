@@ -1,4 +1,4 @@
-import React, { Suspense, useEffect, useState } from "react"
+import React, { useEffect, useState } from "react"
 import { useStore } from "./components/provider/store.hooks"
 import axios, { AxiosError, type AxiosResponse } from "axios";
 import type { User } from "./types/user.type";
@@ -32,11 +32,9 @@ const AuthenticateHandler = ({ children }: { children: React.ReactNode }) => {
     }
 
 
-    return <Suspense fallback={<Loader />}>
-        {!isLoading && <>
-            {children}
-        </>}
-    </Suspense>
+    return <>
+        {isLoading ? <Loader /> : children}
+    </>
 }
 
 export default AuthenticateHandler
