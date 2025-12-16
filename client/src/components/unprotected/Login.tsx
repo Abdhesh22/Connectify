@@ -25,7 +25,7 @@ const Login: React.FC = () => {
 
     const onSubmit = async (data: LoginForm) => {
         try {
-            const response: AxiosResponse<ApiUserResponse> = await axios.post('http://localhost:3000/auth/login', data);
+            const response: AxiosResponse<ApiUserResponse> = await axios.post('/api/auth/login', data);
             console.log('resp: ', response);
         } catch (error) {
             const err = error as AxiosError<{ message?: string }>;

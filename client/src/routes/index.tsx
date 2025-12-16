@@ -17,8 +17,7 @@ const Routes = () => {
     }, [isAuthenticated]);
 
     return <Suspense fallback={<Loader />}>
-        <Loader />
-        {/* <RouterProvider router={routes} /> */}
+        <RouterProvider router={routes} />
     </Suspense>
 }
 

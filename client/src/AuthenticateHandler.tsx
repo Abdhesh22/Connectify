@@ -19,7 +19,7 @@ const AuthenticateHandler = ({ children }: { children: React.ReactNode }) => {
         try {
             setIsLoading(true);
             if (localStorage.getItem('access_token')) {
-                const response: AxiosResponse<User> = await axios.post('http://localhost:3000/auth/session');
+                const response: AxiosResponse<User> = await axios.post('/api/auth/session');
                 setStore(response.data);
             }
         } catch (error) {

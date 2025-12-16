@@ -42,7 +42,7 @@ const Signup = () => {
 
         try {
 
-            const response: AxiosResponse<ApiSuccessResponse> = await axios.get(`http://localhost:3000/auth/email-exist`, {
+            const response: AxiosResponse<ApiSuccessResponse> = await axios.get(`/api/auth/email-exist`, {
                 params: {
                     email: data.email
                 }
@@ -78,7 +78,7 @@ const Signup = () => {
                 password: getValues('password')
             }
 
-            const response: AxiosResponse<ApiUserResponse> = await axios.post('http://localhost:3000/auth/register', payload);
+            const response: AxiosResponse<ApiUserResponse> = await axios.post('/api/auth/register', payload);
             toasty.success(response.data.message);
 
         } catch (error) {

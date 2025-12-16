@@ -27,7 +27,7 @@ const OTPModal: React.FC<OTPModalProps> = ({
         if (!otp || otp.length !== 6) return;
         try {
             setLoading(true);
-            const { data } = await axios.post("http://localhost:3000/auth/verify-otp", {
+            const { data } = await axios.post("/api/auth/verify-otp", {
                 email,
                 otp,
             });
@@ -43,7 +43,7 @@ const OTPModal: React.FC<OTPModalProps> = ({
     const sendOtp = useCallback(async () => {
         try {
             setLoading(true);
-            const { data } = await axios.post("http://localhost:3000/auth/send-otp", {
+            const { data } = await axios.post("/api/auth/send-otp", {
                 email,
             });
 
