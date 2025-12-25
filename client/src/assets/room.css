@@ -654,6 +654,130 @@
   overflow-y: auto;
 }
 
+
+.icon-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.icon-badge {
+  position: absolute;
+  top: -6px;
+  right: -8px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+
+  background-color: #dc3545; /* bootstrap danger */
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  line-height: 1;
+}
+
+
+/* ==============================
+   PEOPLE TABS (PRO)
+============================== */
+
+.people-tabs {
+  display: flex;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  padding: 4px;
+  border-radius: 10px;
+}
+
+.people-tabs button {
+  flex: 1;
+  padding: 6px 10px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #cbd5e1;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.people-tabs button:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.people-tabs button.active {
+  background: rgba(79, 70, 229, 0.25);
+  color: #a5b4fc;
+}
+
+
+/* ==============================
+   JOIN REQUESTS HEADING
+============================== */
+
+.people-section-header {
+  padding: 8px 16px 12px;
+  margin-bottom: 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.people-section-title {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  color: #e5e7eb;
+  text-transform: uppercase;
+}
+
+
+.people-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+
+
+.btn-accept {
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 8px;
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-accept:hover {
+  background: rgba(16, 185, 129, 0.25);
+  border-color: rgba(16, 185, 129, 0.55);
+}
+
+.btn-reject {
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 8px;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  background: rgba(239, 68, 68, 0.12);
+  color: #f87171;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-reject:hover {
+  background: rgba(239, 68, 68, 0.22);
+  border-color: rgba(239, 68, 68, 0.55);
+}
+
 /* mobile responsiveness */
 @media (max-width: 600px) {
   .participant-grid.grid-two,

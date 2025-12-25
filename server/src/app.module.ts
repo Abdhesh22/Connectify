@@ -3,9 +3,9 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import appConfig from './config/app.config';
 import { AuthModule } from './modules/auth/auth.module';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import smtpConfig from './config/smtp.config';
+import { RoomModule } from './modules/room/room.module';
+import { SocketModule } from './modules/socket/socket.module';
 
 @Module({
   imports: [
@@ -21,9 +21,9 @@ import smtpConfig from './config/smtp.config';
         retryDelay: 3000
       })
     }),
-    AuthModule
+    AuthModule,
+    RoomModule,
+    SocketModule
   ],
-  controllers: [AppController],
-  providers: [AppService],
 })
 export class AppModule { }

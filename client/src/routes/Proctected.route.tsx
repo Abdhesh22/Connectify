@@ -10,8 +10,8 @@ interface AppRouteObject extends NonIndexRouteObject {
 }
 
 const ProtectedRoutes: AppRouteObject[] = [
-    { path: "room", element: <Room />, handle: { showSideNav: false, showHeader: false } },
-    { path: "landing", element: <Landing />, handle: { showSideNav: true, showHeader: true } },
+    { path: "/room/:token", element: <Room />, handle: { showSideNav: false, showHeader: false } },
+    { path: "/landing", element: <Landing />, handle: { showSideNav: true, showHeader: true } },
     { path: "*", element: <Navigate to="/landing" replace />, },
 ];
 

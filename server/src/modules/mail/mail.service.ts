@@ -19,7 +19,6 @@ export class MailService {
     async sendOtpMail(email: string, otp: string) {
         try {
             const from = this.configService.get('smtp.from');
-            console.log("from: ", from)
             await this.transporter.sendMail({
                 from,
                 to: email,
@@ -30,7 +29,6 @@ export class MailService {
                 <p>This OTP is valid for 5 minutes.</p>`,
             });
         } catch (error) {
-            console.log("error: ", error);
             throw error;
         }
     }

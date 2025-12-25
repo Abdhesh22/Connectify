@@ -1,6 +1,6 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { RegisterUserDto } from 'src/modules/user/dto/register-user.dto';
+import { RegisterUserDto } from 'src/common/dto/register-user.dto';
 import { User } from './schemas/user.schema';
 import { Model, Types } from 'mongoose';
 import { USER_STATUS } from 'src/common/constants/user-status.constant';

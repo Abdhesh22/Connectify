@@ -1,4 +1,33 @@
+import axios, { AxiosError, type AxiosResponse } from "axios";
+import { toasty } from "../../../utils/toasty.util";
+import { useNavigate } from "react-router-dom";
+import { useStore } from "../../provider/store.hooks";
+import { TOAST_MESSAGE } from "../../../constants/message.constant";
+
+type logOutResponse = {
+    message: string;
+}
+
 const Header = () => {
+
+    const navigate = useNavigate();
+    const { setStore } = useStore();
+
+    const logOut = async () => {
+        try {
+
+            const response: AxiosResponse<logOutResponse> = await axios.post("/api/auth/logout");
+            toasty.success(response.data.message);
+
+            setStore(null);
+            navigate("/login");
+
+        } catch (error) {
+            const err = error as AxiosError<{ message?: string }>;
+            toasty.error(err?.response?.data?.message || TOAST_MESSAGE.ERROR)
+        }
+    }
+
     return (
         <header className="p-2 py-2">
             <div className="d-flex justify-content-between align-items-center">
@@ -18,7 +47,8 @@ const Header = () => {
                     </div>
                 </div>
                 <div className="d-flex align-items-center">
-                    <i className="bi bi-person-circle fs-3 text-secondary"></i>
+                    {/* <i className="bi bi-person-circle fs-3 text-secondary"></i> */}
+                    <button className="btn btn-danger" onClick={() => logOut()}>Logout</button>
                 </div>
             </div>
         </header>

@@ -1,7 +1,6 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 import { BadRequestException, Injectable, Type } from '@nestjs/common';
 import { UserService } from 'src/modules/user/user.service';
-import { RegisterUserDto } from '../user/dto/register-user.dto';
+import { RegisterUserDto } from '../../common/dto/register-user.dto';
 import bcrypt from "bcrypt"
 import { JwtService } from '@nestjs/jwt';
 import { OtpDto } from '../otp/dto/otp-send.dto';
@@ -78,11 +77,7 @@ export class AuthService {
 
         const payload = { sessionId: session._id };
         const token = await this.jwtService.signAsync(payload);
-        console.log({
-            firstName: user.firstName,
-            lastName: user.lastName,
-            email: user.email
-        })
+
         return {
             access_token: token,
             message: 'Login Successfully',
@@ -96,6 +91,9 @@ export class AuthService {
 
 
     async logout(sessionId: Types.ObjectId) {
-        return await this.sessionService.deleteById(sessionId);
+        await this.sessionService.deleteById(sessionId);
+        return {
+            message: 'Logout Successfully'
+        }
     }
 }

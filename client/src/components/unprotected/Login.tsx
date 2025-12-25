@@ -7,6 +7,7 @@ import axios, { AxiosError, type AxiosResponse } from "axios";
 import type { ApiUserResponse } from "../../types/axios.type";
 import { TOAST_MESSAGE } from "../../constants/message.constant";
 import { toasty } from "../../utils/toasty.util";
+import { useStore } from "../provider/store.hooks";
 
 type LoginForm = {
     email: string;
@@ -14,6 +15,7 @@ type LoginForm = {
 };
 
 const Login: React.FC = () => {
+    const { setStore } = useStore()
     const navigate = useNavigate();
     const { control, handleSubmit, formState: { errors } } = useForm<LoginForm>({
         defaultValues: {
@@ -26,7 +28,9 @@ const Login: React.FC = () => {
     const onSubmit = async (data: LoginForm) => {
         try {
             const response: AxiosResponse<ApiUserResponse> = await axios.post('/api/auth/login', data);
-            console.log('resp: ', response);
+            toasty.success(response.data.message);
+            setStore(response.data.user)
+            navigate("/landing");
         } catch (error) {
             const err = error as AxiosError<{ message?: string }>;
             toasty.error(err?.response?.data?.message || TOAST_MESSAGE.ERROR)

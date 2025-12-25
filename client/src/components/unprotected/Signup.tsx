@@ -80,7 +80,7 @@ const Signup = () => {
 
             const response: AxiosResponse<ApiUserResponse> = await axios.post('/api/auth/register', payload);
             toasty.success(response.data.message);
-
+            navigate("/landing");
         } catch (error) {
             const err = error as AxiosError<{ message?: string }>;
             toasty.error(err?.response?.data?.message || TOAST_MESSAGE.ERROR)

@@ -1,11 +1,13 @@
 import { Body, Controller, Get, Post, Query, Request, Res, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { RegisterUserDto } from '../user/dto/register-user.dto';
+import { RegisterUserDto } from '../../common/dto/register-user.dto';
 import { OtpDto } from '../otp/dto/otp-send.dto';
 import { OtpVerifyDto } from '../otp/dto/otp-verify.dto';
 import { UserEmailExistDto } from '../user/dto/user-email-exist.dto';
 import { AuthGuard } from 'src/modules/auth/auth.guard';
 import { LoginUserDto } from '../user/dto/login-user.dto';
+import { User } from 'src/common/decorator/user.decorator';
+import { UserDto } from 'src/common/dto/user.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -50,11 +52,11 @@ export class AuthController {
 
     @Post('session')
     @UseGuards(AuthGuard)
-    createSession(@Request() req) {
+    createSession(@User() user: UserDto) {
         return {
-            firstName: req.user.firstName,
-            lastName: req.user.lastName,
-            email: req.user.email
+            firstName: user.firstName,
+            lastName: user.lastName,
+            email: user.email
         };
     }
 

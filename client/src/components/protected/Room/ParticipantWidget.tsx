@@ -1,13 +1,13 @@
 import type React from "react";
-import Camera from "../../common-components/custom-tags/Camera";
+// import Camera from "./Camera";
 
-const Participant: React.FC = () => {
+const ParticipantWidget: React.FC = () => {
 
     const participants = [
         { id: 1, name: "Priya", initials: "PM", mic: false, camera: false },
         { id: 2, name: "Rohan", initials: "R", mic: true, camera: false },
-        { id: 1, name: "Priya", initials: "PM", mic: false, camera: false },
-        { id: 2, name: "Rohan", initials: "R", mic: true, camera: false },
+        { id: 3, name: "Priya", initials: "PM", mic: false, camera: false },
+        { id: 4, name: "Rohan", initials: "R", mic: true, camera: false },
     ];
 
     const visibleLimit = 25;
@@ -22,7 +22,7 @@ const Participant: React.FC = () => {
 
     return (
         <div className={`participant-grid enhance-ui ${getGridClass()}`}>
-
+            {/* <Camera /> */}
             {visibleParticipants.map((user) => (
                 <div className="video-tile modern-tile" key={user.id}>
 
@@ -34,7 +34,7 @@ const Participant: React.FC = () => {
                             </div>
                         ) : (
                             <div className="camera-container">
-                                <Camera />
+
                             </div>
                         )}
                     </div>
@@ -62,4 +62,4 @@ const Participant: React.FC = () => {
     );
 };
 
-export default Participant;
+export default ParticipantWidget;

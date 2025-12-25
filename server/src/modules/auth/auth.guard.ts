@@ -9,7 +9,8 @@ import { USER_STATUS } from 'src/common/constants/user-status.constant';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-    constructor(private jwtService: JwtService,
+    constructor(
+        private jwtService: JwtService,
         private readonly userService: UserService,
         private readonly sessionService: SessionService
     ) { }
@@ -26,7 +27,7 @@ export class AuthGuard implements CanActivate {
                 secret: process.env.JWT_TOKEN
             });
 
-            const session = await this.sessionService.findById(payload.session);
+            const session = await this.sessionService.findById(payload.sessionId);
             if (!session) {
                 throw new UnauthorizedException({ message: 'Session Expired', reason: 'SESSION_TERMINATE' })
             }
@@ -42,11 +43,10 @@ export class AuthGuard implements CanActivate {
                 throw new UnauthorizedException({ message: 'Session Expired', reason: 'SESSION_TERMINATE' })
             }
 
-            if (dayjs(session.expiresAt).diff(dayjs(), 'minute') < 15) {
-                await this.sessionService.updateOneSession(session._id, {
-                    expiresAt: dayjs().add(1, 'hour').toDate()
-                });
-            }
+            await this.sessionService.updateOneSession(session._id, {
+                expiresAt: dayjs().add(1, 'hour').toDate()
+            });
+
             request['sessionId'] = session._id;
             request['user'] = user;
         } catch (error) {
