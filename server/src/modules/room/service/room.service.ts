@@ -98,7 +98,6 @@ export class RoomService {
             token
         });
         const session = await this.joinHost(hostId, token);
-        console.log("session: ", session);
         return {
             token,
             sessionId: session?.sessionId,

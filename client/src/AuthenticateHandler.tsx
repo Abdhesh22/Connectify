@@ -23,7 +23,7 @@ const AuthenticateHandler = ({ children }: { children: React.ReactNode }) => {
                 setStore(response.data);
             }
         } catch (error) {
-            console.log(error);
+            console.error(error);
             const err = error as AxiosError<{ message?: string }>;
             toasty.error(err?.response?.data?.message || TOAST_MESSAGE.ERROR)
         } finally {

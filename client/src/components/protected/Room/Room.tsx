@@ -6,6 +6,8 @@ import ParticipantWidget from "./ParticipantWidget";
 import { connectSocket } from "../../../socket";
 import { useParams } from "react-router-dom";
 import { useNotificationSound } from "../../common-components/Notification/UseNotificationSound";
+import { useStore } from "../../provider/store.hooks";
+import { toasty } from "../../../utils/toasty.util";
 
 
 type RequestPeople = {
@@ -44,6 +46,7 @@ const Room: React.FC<RoomProps> = ({ isHost, handleLeaveRoom }) => {
     const playJoinSound = useNotificationSound("/sounds/join-request.mp3");
     const playLeaveSound = useNotificationSound("/sounds/participant-leave.mp3")
 
+    const { store } = useStore();
 
     const { token } = useParams<{ token: string }>();
     const [control, setControl] = useState({
@@ -150,6 +153,16 @@ const Room: React.FC<RoomProps> = ({ isHost, handleLeaveRoom }) => {
         }
     }
 
+
+    const handleCopy = async () => {
+        try {
+            await navigator.clipboard.writeText(`${window.location.origin}/room/${token}`);
+            toasty.success("Link Copied!")
+        } catch {
+            toasty.error("Failed to copy");
+        }
+    };
+
     return (
         <>
             <div className="meet-root">
@@ -157,17 +170,22 @@ const Room: React.FC<RoomProps> = ({ isHost, handleLeaveRoom }) => {
                 {/* Top header */}
                 <header className="meet-header">
                     <div className="meet-header-left">
-                        <div className="meet-logo-circle">M</div>
-                        <div>
-                            <div className="meet-title">Team Standup</div>
-                            <div className="meet-subtitle">Meeting code: abc-def-ghi</div>
+                        <div className="meet-logo-circle">
+                            {store?.firstName.charAt(0).toUpperCase()}
+                        </div>
+                        <div className="meet-info" onClick={handleCopy}>
+                            <div className="meet-subtitle">
+                                <span className="meeting-code"> {token}</span>
+                                <i
+                                    role="button"
+                                    aria-label="Copy meeting link"
+                                    className={`bi bi-clipboard`}
+                                />
+                            </div>
                         </div>
                     </div>
 
-                    <div className="meet-header-right">
-                        <span className="meet-header-pill">18:42</span>
-                        <span className="meet-header-pill">You</span>
-                    </div>
+
                 </header>
 
                 {/* Main content */}

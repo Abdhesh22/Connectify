@@ -92,6 +92,7 @@ const Index: React.FC = () => {
     useEffect(() => {
         if (!token) return;
         if (!roomSession?.isJoined) return;
+
         const autoLeave = () => {
             const payload = {
                 sessionId: localStorage.getItem("access_token"),
@@ -100,24 +101,32 @@ const Index: React.FC = () => {
                 ts: Date.now(),
             };
 
-            navigator.sendBeacon("/api/room/auto-leave",
+            navigator.sendBeacon(
+                "/api/room/auto-leave",
                 new Blob([JSON.stringify(payload)], {
                     type: "application/json",
                 })
             );
         };
 
+        // Fires on reload & tab close
         window.addEventListener("beforeunload", autoLeave);
-        document.addEventListener("visibilitychange", () => {
-            if (document.visibilityState === "hidden") {
+
+        // Needed for Safari / iOS (tab close / navigation away)
+        const handlePageHide = (e: PageTransitionEvent) => {
+            // Ignore bfcache restores
+            if (!e.persisted) {
                 autoLeave();
             }
-        });
+        };
+
+        window.addEventListener("pagehide", handlePageHide);
 
         return () => {
             window.removeEventListener("beforeunload", autoLeave);
+            window.removeEventListener("pagehide", handlePageHide);
         };
-    }, [roomSession?.isJoined]);
+    }, [token, roomSession?.isJoined]);
 
 
     return (

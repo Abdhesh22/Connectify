@@ -23,8 +23,6 @@ export class RoomSessionBeaconGuard implements CanActivate {
 
         try {
 
-            console.log("request.body: ", request.body);
-
             const jwtToken = request.body.sessionId;
             const roomToken = request.body.roomSessionId;
 
@@ -32,7 +30,6 @@ export class RoomSessionBeaconGuard implements CanActivate {
                 secret: process.env.JWT_TOKEN
             });
 
-            console.log("payload: ", payload);
             const session = await this.sessionService.findById(payload.sessionId);
             if (!session) {
                 throw new UnauthorizedException({ message: 'Session Expired', reason: 'SESSION_TERMINATE' })
@@ -53,15 +50,10 @@ export class RoomSessionBeaconGuard implements CanActivate {
                 expiresAt: dayjs().add(1, 'hour').toDate()
             });
 
-            console.log("roomSesson: ");
-
-
             const roomSession = await this.roomSessionService.findOne({ _id: new Types.ObjectId(roomToken) });
-            console.log("roomSession: ", roomSession);
             if (!roomSession) {
                 throw new UnauthorizedException({ message: 'Room Session Expired', reason: 'ROOM_SESSION_TERMINATE' })
             }
-            console.log("line 62")
 
             if (dayjs(roomSession.expiresAt).isBefore(dayjs())) {
                 await this.roomSessionService.deleteById(roomSession._id);

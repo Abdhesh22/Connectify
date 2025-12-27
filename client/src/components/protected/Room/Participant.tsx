@@ -35,7 +35,7 @@ type ParticipantProp = {
 const Participant: React.FC<ParticipantProp> = ({
     leavedParticipant
 }) => {
-    console.log("leavedParticipant: ", leavedParticipant);
+
     const { token } = useParams<{ token: string }>();
 
     const scrollRef = useRef<HTMLDivElement | null>(null);

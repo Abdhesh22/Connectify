@@ -786,6 +786,25 @@
   }
 }
 
+.meet-subtitle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #e5e7eb; /* light text on dark bg */
+}
+
+.meeting-code {
+  font-size: 13px;
+  opacity: 0.9;
+}
+
+.meet-info{
+  font-size: 16px;
+  cursor: pointer;
+  color: #9ca3af; /* muted icon */
+  transition: color 0.2s ease, transform 0.1s ease;
+}
+
 
 /* ============================================================
    1) VERY LARGE DESKTOPS  (1440px and above)

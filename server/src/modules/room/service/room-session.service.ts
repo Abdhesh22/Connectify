@@ -15,7 +15,6 @@ export class RoomSessionService {
     }
 
     async findOne(filterCondition, projection = {}) {
-        console.log("filterCondition", filterCondition);
         return await this.roomSessionModel.findOne(filterCondition, projection);
     }
 

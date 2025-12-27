@@ -4,8 +4,6 @@ import InfiniteScroll from "react-infinite-scroll-component";
 import { useParams } from "react-router-dom";
 import { toasty } from "../../../utils/toasty.util";
 
-/* ---------------- TYPES ---------------- */
-
 type RequestPeople = {
     _id: string;
     name: string;
@@ -28,8 +26,6 @@ type JoinRequestProps = {
 };
 
 const LIMIT = 20;
-
-/* ---------------- COMPONENT ---------------- */
 
 const JoinRequest: React.FC<JoinRequestProps> = ({
     joinRequests,
@@ -69,16 +65,11 @@ const JoinRequest: React.FC<JoinRequestProps> = ({
         }
     }
 
-    /* ---------------- INITIAL LOAD ---------------- */
-
     useEffect(() => {
         fetchRequests(false);
     }, []);
 
-    /* ---------------- REAL-TIME JOIN REQUESTS ---------------- */
-
     useEffect(() => {
-        console.log("joinRequests: ", joinRequests);
         if (!joinRequests.length) return;
 
         setRequests(prev => {
@@ -90,8 +81,6 @@ const JoinRequest: React.FC<JoinRequestProps> = ({
         });
     }, [joinRequests]);
 
-    /* ---------------- ACCEPTED REQUEST REMOVE ---------------- */
-
     useEffect(() => {
         if (!acceptedRequest?.joinRequestId) return;
 
@@ -101,9 +90,6 @@ const JoinRequest: React.FC<JoinRequestProps> = ({
             )
         );
     }, [acceptedRequest]);
-
-
-    /* ---------------- ACTIONS ---------------- */
 
     const acceptRequest = async (people: RequestPeople) => {
         try {
@@ -116,7 +102,7 @@ const JoinRequest: React.FC<JoinRequestProps> = ({
                 prev.filter(r => r._id !== people._id)
             );
         } catch (error) {
-            console.log("error: ", error);
+            console.error("error: ", error);
             toasty.error("Failed to accept request");
         }
     };
@@ -132,12 +118,10 @@ const JoinRequest: React.FC<JoinRequestProps> = ({
                 prev.filter(r => r._id !== people._id)
             );
         } catch (error) {
-            console.log("error: ", error);
+            console.error("error: ", error);
             toasty.error("Failed to reject request");
         }
     };
-
-    /* ---------------- UI STATES ---------------- */
 
     if (loading && requests.length === 0) {
         return <p>Loading join requests...</p>;
@@ -146,8 +130,6 @@ const JoinRequest: React.FC<JoinRequestProps> = ({
     if (!loading && requests.length === 0) {
         return <p>No join requests</p>;
     }
-
-    /* ---------------- RENDER ---------------- */
 
     return (
         <div className="people-list">
