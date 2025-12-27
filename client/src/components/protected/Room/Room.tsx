@@ -55,8 +55,8 @@ const Room: React.FC<RoomProps> = ({ isHost, handleLeaveRoom }) => {
         screenShare: false,
         options: false,
         leave: false,
-        chat: true,
-        people: false
+        chat: false,
+        people: true
     })
 
     const [leavedParticipant, setLeavedParticipant] = useState<ParticipantLeavePayload>();
@@ -253,12 +253,12 @@ const Room: React.FC<RoomProps> = ({ isHost, handleLeaveRoom }) => {
                             <div className="meet-controls-right">
 
                                 {/* Chat Toggle */}
-                                <button
+                                {/* <button
                                     className={`meet-right-btn ${control.chat ? "meet-right-btn--active" : ""}`}
                                     onClick={() => handleControl("chat")}
                                 >
                                     <i className={`bi ${control.chat ? "bi-chat-left-fill" : "bi-chat-left-dots-fill"}`}></i>
-                                </button>
+                                </button> */}
 
                                 {/* People Toggle */}
                                 <button
@@ -304,7 +304,7 @@ const Room: React.FC<RoomProps> = ({ isHost, handleLeaveRoom }) => {
                             {isHost && activeTab === "requests" && <JoinRequest joinRequests={joinRequests} acceptedRequest={acceptedRequest} />}
                         </div>
                     }
-                    {control.chat && <Chat />}
+                    {/* {control.chat && <Chat />} */}
                 </main >
             </div >
         </>
