@@ -3,11 +3,13 @@ import { toasty } from "../../../utils/toasty.util";
 import axios, { AxiosError, type AxiosResponse } from "axios";
 import { TOAST_MESSAGE } from "../../../constants/message.constant";
 import { useNavigate } from "react-router-dom";
+import { setRoomSessionToken } from "../../provider/room-session.store";
 
 
 type createRoomAxiosResponse = {
     token?: string;
-    message: string
+    message: string;
+    sessionId: string;
 }
 
 const Landing: React.FC = () => {
@@ -17,6 +19,7 @@ const Landing: React.FC = () => {
     const createRoom = async () => {
         try {
             const response: AxiosResponse<createRoomAxiosResponse> = await axios.post("/api/room");
+            setRoomSessionToken(response.data.sessionId);
             toasty.success(response.data.message);
             navigate(`/room/${response.data.token}`);
         } catch (error) {

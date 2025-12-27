@@ -29,6 +29,11 @@ type RoomProps = {
     handleLeaveRoom: () => void
 }
 
+type ParticipantLeavePayload = {
+    token: string;
+    name: string;
+    participantId: string;
+}
 
 type TabType = "participants" | "requests";
 
@@ -37,6 +42,8 @@ const Room: React.FC<RoomProps> = ({ isHost, handleLeaveRoom }) => {
 
     const [activeTab, setActiveTab] = useState<TabType>("participants");
     const playJoinSound = useNotificationSound("/sounds/join-request.mp3");
+    const playLeaveSound = useNotificationSound("/sounds/participant-leave.mp3")
+
 
     const { token } = useParams<{ token: string }>();
     const [control, setControl] = useState({
@@ -45,10 +52,11 @@ const Room: React.FC<RoomProps> = ({ isHost, handleLeaveRoom }) => {
         screenShare: false,
         options: false,
         leave: false,
-        chat: false,
+        chat: true,
         people: false
     })
 
+    const [leavedParticipant, setLeavedParticipant] = useState<ParticipantLeavePayload>();
     const [acceptedRequest, setAcceptedRequest] = useState<ParticipantPeople>();
     const [joinRequests, setJoinRequests] = useState<RequestPeople[]>([]);
     const [requestCount, setRequestCount] = useState(0);
@@ -62,7 +70,7 @@ const Room: React.FC<RoomProps> = ({ isHost, handleLeaveRoom }) => {
     socket.on("join-request", (data: RequestPeople) => {
         if (control.people) {
             if (activeTab == 'requests') {
-                setJoinRequests(prev => [data, ...prev]);
+                setJoinRequests([data]);
             }
         } else {
             setRequestCount(prev => prev + 1);
@@ -75,6 +83,12 @@ const Room: React.FC<RoomProps> = ({ isHost, handleLeaveRoom }) => {
             setAcceptedRequest(data);
         }
     });
+
+    socket.on("participant-leave", (data: ParticipantLeavePayload) => {
+        setLeavedParticipant(data);
+        playLeaveSound();
+    });
+
 
     const handleControl = (key: string) => {
         switch (key) {
@@ -115,7 +129,7 @@ const Room: React.FC<RoomProps> = ({ isHost, handleLeaveRoom }) => {
                     return {
                         ...prev,
                         people: false,
-                        chat: !control.chat
+                        chat: true
                     }
                 })
                 break;
@@ -125,7 +139,7 @@ const Room: React.FC<RoomProps> = ({ isHost, handleLeaveRoom }) => {
                 setControl(prev => {
                     return {
                         ...prev,
-                        people: !control.people,
+                        people: true,
                         chat: false
                     }
                 })
@@ -267,8 +281,8 @@ const Room: React.FC<RoomProps> = ({ isHost, handleLeaveRoom }) => {
                                     </div>
                                 )}
                             </div>
-                            {!isHost && <Participant />}
-                            {isHost && activeTab === "participants" && <Participant />}
+                            {!isHost && <Participant leavedParticipant={leavedParticipant} />}
+                            {isHost && activeTab === "participants" && <Participant leavedParticipant={leavedParticipant} />}
                             {isHost && activeTab === "requests" && <JoinRequest joinRequests={joinRequests} acceptedRequest={acceptedRequest} />}
                         </div>
                     }

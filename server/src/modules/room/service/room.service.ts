@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Room } from '../schema/room.schema';
 import { Model, Types } from 'mongoose';
@@ -98,7 +98,7 @@ export class RoomService {
             token
         });
         const session = await this.joinHost(hostId, token);
-
+        console.log("session: ", session);
         return {
             token,
             sessionId: session?.sessionId,
@@ -129,33 +129,40 @@ export class RoomService {
 
     async leave(roomSessionDto: RoomSessionDto) {
 
-        // let's create leave what happen when a person.
-        // socket will go to each members.
-        // participant should be marked as leftAt
-        // room Session will be delete.
+        const user = await this.userService.findById(roomSessionDto.userId, { firstName: 1, lastName: 1 });
 
-        // return await this.roomSessionService.deleteOne({ token: roomTokenDto.token, userId: userId });
+        // Marked Participant Left..
+        await this.participantModel.updateOne({ _id: roomSessionDto.participantId }, {
+            $set: {
+                leftAt: dayjs().toDate(),
+            }
+        })
+
+
+        await this.socketGateway.handleParticipantLeave({
+            token: roomSessionDto.token,
+            name: `${user?.firstName} ${user?.lastName}`,
+            participantId: roomSessionDto.participantId
+        })
+
+        return {
+            message: "Participant Left"
+        }
     }
 
-    addParticipant() {
 
-    }
-
-    removeParticipant() {
-
-    }
-
-    session() {
-
-    }
-
-    async acceptInvite(roomId: Types.ObjectId, joinActionDto: JoinActionDto, token: string) {
+    async acceptInvite(roomId: Types.ObjectId, joinActionDto: JoinActionDto) {
 
         const user = await this.userService.findById(joinActionDto.userId, { firstName: 1, lastName: 1, _id: 1 });
         if (!user) return;
 
         const isExist = await this.participantModel.findOne({ joinRequestId: joinActionDto.joinRequestId });
         if (isExist) return;
+
+        const room = await this.roomModel.findById(roomId);
+        if (!room) {
+            throw new BadRequestException('Room not found');
+        }
 
         const joinRequest = await this.joinRequestModel.findOneAndUpdate(
             { _id: joinActionDto.joinRequestId, isJoined: false },
@@ -175,12 +182,12 @@ export class RoomService {
         const roomSession = await this.roomSessionService.create({
             roomId: roomId,
             userId: user._id,
-            token: token,
+            token: room?.token,
             participantId: participant._id,
             expiresAt: dayjs().add(15, 'minute').toDate()
         });
 
-        return await this.socketGateway.handleAcceptInvite(token, {
+        return await this.socketGateway.handleAcceptInvite(room.token, {
             roomId: roomId,
             isHost: false,
             userId: user._id,
@@ -195,9 +202,8 @@ export class RoomService {
         await this.joinRequestModel.deleteOne({ _id: joinActionDto.joinRequestId });
         return await this.socketGateway.handleRejectInvite(roomTokenDto.token, {
             userId: joinActionDto.userId
-        })
+        });
     }
-
 
     async participants(participantListDto: ParticipantListDto, roomSessionDto: RoomSessionDto) {
         const { roomId } = roomSessionDto;
@@ -222,7 +228,7 @@ export class RoomService {
             },
             {
                 $project: {
-                    _id: 0,
+                    _id: 1,
                     userId: 1,
                     roomId: 1,
                     joinedAt: 1,

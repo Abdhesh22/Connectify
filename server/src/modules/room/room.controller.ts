@@ -14,6 +14,7 @@ import { User } from 'src/common/decorator/user.decorator';
 import { UserDto } from 'src/common/dto/user.dto';
 import { RoomPermission } from './decorator/room-permission.decorator';
 import { RoomPermissionDto } from './dto/room-permission.dto';
+import { RoomSessionBeaconGuard } from './guards/room-session-beacon.guard';
 
 
 @Controller('room')
@@ -44,14 +45,21 @@ export class RoomController {
         return this.roomService.leave(roomSession);
     }
 
+    @Post("auto-leave")
+    @UseGuards(RoomSessionBeaconGuard)
+    autoLeave(
+        @RoomSession() roomSession: RoomSessionDto
+    ) {
+        return this.roomService.leave(roomSession);
+    }
+
     @Post('accept')
     @UseGuards(AuthGuard, RoomSessionGuard, RoomHostGuard)
     acceptInvite(
         @RoomSession() roomSessionDto: RoomSessionDto,
         @Body() joinActionDto: JoinActionDto,
-        @Param() roomTokenDto: RoomTokenDto
     ) {
-        return this.roomService.acceptInvite(roomSessionDto.roomId, joinActionDto, roomTokenDto.token);
+        return this.roomService.acceptInvite(roomSessionDto.roomId, joinActionDto);
     }
 
     @Post('reject')
@@ -61,12 +69,6 @@ export class RoomController {
         @Param() roomTokenDto: RoomTokenDto) {
 
         return this.roomService.rejectInvite(joinActionDto, roomTokenDto);
-    }
-
-    @Delete('participant')
-    @UseGuards(AuthGuard)
-    removeParticipant() {
-        return this.roomService.removeParticipant();
     }
 
     @Post('session')

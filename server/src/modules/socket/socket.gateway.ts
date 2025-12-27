@@ -36,6 +36,11 @@ type rejectInvitePayload = {
   userId: string
 }
 
+type ParticipantLeavePayload = {
+  token: string;
+  name: string
+  participantId: Types.ObjectId;
+}
 
 @WebSocketGateway({
   cors: { origin: '*' },
@@ -205,6 +210,11 @@ export class SocketGateway
       roomToken
     })
 
+  }
+
+
+  async handleParticipantLeave(participantLeavePayload: ParticipantLeavePayload) {
+    this.server.to(participantLeavePayload.token).emit("participant-leave", participantLeavePayload);
   }
 
 }

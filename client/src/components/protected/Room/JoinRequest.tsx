@@ -115,7 +115,8 @@ const JoinRequest: React.FC<JoinRequestProps> = ({
             setRequests(prev =>
                 prev.filter(r => r._id !== people._id)
             );
-        } catch {
+        } catch (error) {
+            console.log("error: ", error);
             toasty.error("Failed to accept request");
         }
     };
@@ -130,7 +131,8 @@ const JoinRequest: React.FC<JoinRequestProps> = ({
             setRequests(prev =>
                 prev.filter(r => r._id !== people._id)
             );
-        } catch {
+        } catch (error) {
+            console.log("error: ", error);
             toasty.error("Failed to reject request");
         }
     };

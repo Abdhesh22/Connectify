@@ -1,8 +1,10 @@
-let roomSessionToken: string | null = null;
 export const setRoomSessionToken = (token: string | null) => {
-    roomSessionToken = token;
+    if (token) {
+        sessionStorage.setItem("roomSessionToken", token);
+    }
 };
-export const getRoomSessionToken = () => roomSessionToken;
+
+export const getRoomSessionToken = () => sessionStorage.getItem("roomSessionToken");
 export const clearRoomSessionToken = () => {
-    roomSessionToken = null;
+    sessionStorage.clear();
 };

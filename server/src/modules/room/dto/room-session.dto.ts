@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsMongoId, IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsMongoId, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { Types } from 'mongoose';
 
 export class RoomSessionDto {
@@ -18,9 +18,15 @@ export class RoomSessionDto {
 
     @ApiProperty({ description: 'Room session token' })
     @IsString()
-    sessionToken: string;
+    token: string;
 
     @ApiProperty({ description: 'Session created time', required: false })
     @IsOptional()
     joinedAt?: Date;
+
+
+    @ApiProperty({ description: "Room Participant Id", required: false })
+    @IsNotEmpty()
+    @IsMongoId()
+    participantId: Types.ObjectId
 }

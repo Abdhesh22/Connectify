@@ -17,11 +17,25 @@ type ParticipantPeople = {
     isHost: boolean;
     mic: boolean;
     camera: boolean;
+    _id: string;
 };
+
+type ParticipantLeavePayload = {
+    token: string;
+    name: string;
+    participantId: string;
+}
+
+type ParticipantProp = {
+    leavedParticipant: ParticipantLeavePayload | undefined
+}
 
 /* ---------------- COMPONENT ---------------- */
 
-const Participant: React.FC = () => {
+const Participant: React.FC<ParticipantProp> = ({
+    leavedParticipant
+}) => {
+    console.log("leavedParticipant: ", leavedParticipant);
     const { token } = useParams<{ token: string }>();
 
     const scrollRef = useRef<HTMLDivElement | null>(null);
@@ -84,6 +98,13 @@ const Participant: React.FC = () => {
     }, [token]);
 
     /* ---------------- UI STATES ---------------- */
+
+    useEffect(() => {
+        if (!leavedParticipant) {
+            return;
+        }
+        setParticipants(prev => prev.filter(participant => participant._id != leavedParticipant.participantId))
+    }, [leavedParticipant])
 
     if (loading && participants.length === 0) {
         return <p>Loading participants...</p>;

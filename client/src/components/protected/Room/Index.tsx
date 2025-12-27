@@ -6,7 +6,7 @@ import axios, { AxiosError, type AxiosResponse } from "axios";
 import { TOAST_MESSAGE } from "../../../constants/message.constant";
 import Loader from "../../common-components/Loader";
 import { connectSocket } from "../../../socket";
-import { setRoomSessionToken } from "../../provider/room-session.store";
+import { getRoomSessionToken, setRoomSessionToken } from "../../provider/room-session.store";
 
 type RoomAuthResponse = {
     sessionId: string | null;
@@ -31,19 +31,40 @@ const Index: React.FC = () => {
 
     const [roomSession, setRoomSession] = useState<RoomAuthResponse>();
     const [joinButtonMessage, setJoinButtonMessage] = useState<string>();
-    const socket = connectSocket();
+
+    useEffect(() => {
+        const socket = connectSocket();
+
+        socket.on("invite-accepted", (data: InviteAcceptedResponse) => {
+            setRoomSessionToken(data.sessionId);
+            setJoinButtonMessage("");
+            setRoomSession({
+                sessionId: data.sessionId,
+                isHost: false,
+                isJoined: true
+            });
+        })
+
+        socket.on("invite-rejected", () => {
+            setJoinButtonMessage("Join request rejected by the host");
+            setTimeout(() => {
+                setJoinButtonMessage("");
+            }, 1000);
+        });
+
+    }, [])
 
 
     const join = async () => {
         try {
 
             const response: AxiosResponse<RoomJoinResponse> = await axios.post(`/api/room/join/${token}`);
-            console.log(response);
             if (response.data.isHost) {
                 setRoomSessionToken(response.data.sessionId);
                 setRoomSession({
                     sessionId: response.data.sessionId,
-                    isHost: true
+                    isHost: true,
+                    isJoined: true
                 });
             } else {
                 setJoinButtonMessage("Waiting for host approval…");
@@ -70,11 +91,22 @@ const Index: React.FC = () => {
 
     useEffect(() => {
         if (!token) return;
+        if (!roomSession?.isJoined) return;
         const autoLeave = () => {
-            navigator.sendBeacon(`/api/room/leave`,
-                new Blob([], { type: "application/json" })
-            )
+            const payload = {
+                sessionId: localStorage.getItem("access_token"),
+                roomSessionId: getRoomSessionToken(),
+                source: "AUTO_LEAVE",
+                ts: Date.now(),
+            };
+
+            navigator.sendBeacon("/api/room/auto-leave",
+                new Blob([JSON.stringify(payload)], {
+                    type: "application/json",
+                })
+            );
         };
+
         window.addEventListener("beforeunload", autoLeave);
         document.addEventListener("visibilitychange", () => {
             if (document.visibilityState === "hidden") {
@@ -85,25 +117,7 @@ const Index: React.FC = () => {
         return () => {
             window.removeEventListener("beforeunload", autoLeave);
         };
-    }, [token]);
-
-
-
-    socket.on("invite-accepted", (data: InviteAcceptedResponse) => {
-        setRoomSessionToken(data.sessionId);
-        setJoinButtonMessage("");
-        setRoomSession({
-            sessionId: data.sessionId,
-            isHost: false
-        });
-    })
-
-    socket.on("invite-rejected", () => {
-        setJoinButtonMessage("Join request rejected by the host");
-        setTimeout(() => {
-            setJoinButtonMessage("");
-        }, 1000);
-    });
+    }, [roomSession?.isJoined]);
 
 
     return (
