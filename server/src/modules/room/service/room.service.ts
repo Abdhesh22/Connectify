@@ -97,10 +97,9 @@ export class RoomService {
             hostId,
             token
         });
-        const session = await this.joinHost(hostId, token);
+
         return {
             token,
-            sessionId: session?.sessionId,
             message: 'Room has been created'
         };
     }
