@@ -65,11 +65,6 @@ const Room: React.FC<RoomProps> = ({ isHost, handleLeaveRoom }) => {
     const [requestCount, setRequestCount] = useState(0);
     const socket = connectSocket();
 
-    socket.emit("join-room", {
-        roomId: token,
-        isHost: isHost,
-    });
-
     socket.on("join-request", (data: RequestPeople) => {
         if (control.people) {
             if (activeTab == 'requests') {
@@ -225,20 +220,20 @@ const Room: React.FC<RoomProps> = ({ isHost, handleLeaveRoom }) => {
                                 </button>
 
                                 {/* Screen Share */}
-                                <button
+                                {/* <button
                                     className={`control-btn control-btn--circle ${control.screenShare ? "control-btn--active" : "control-btn--danger"}`}
                                     onClick={() => handleControl("screenShare")}
                                 >
                                     <i className={`control-icon bi ${control.screenShare ? "bi-tv" : "bi-tv-fill"}`}></i>
-                                </button>
+                                </button> */}
 
                                 {/* More Options */}
-                                <button
+                                {/* <button
                                     className="control-btn control-btn--circle control-btn--active"
                                     onClick={() => handleControl("options")}
                                 >
                                     <i className="control-icon bi bi-three-dots"></i>
-                                </button>
+                                </button> */}
 
                                 {/* End Call */}
                                 <button

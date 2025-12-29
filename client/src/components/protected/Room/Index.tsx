@@ -33,7 +33,13 @@ const Index: React.FC = () => {
     const [joinButtonMessage, setJoinButtonMessage] = useState<string>();
 
     useEffect(() => {
+
         const socket = connectSocket();
+
+        socket.emit("join-room", {
+            roomId: token,
+            isHost: roomSession?.isHost,
+        });
 
         socket.on("invite-accepted", (data: InviteAcceptedResponse) => {
             setRoomSessionToken(data.sessionId);
@@ -52,7 +58,7 @@ const Index: React.FC = () => {
             }, 1000);
         });
 
-    }, [])
+    }, [roomSession])
 
 
     const join = async () => {

@@ -42,6 +42,14 @@ type ParticipantLeavePayload = {
   participantId: Types.ObjectId;
 }
 
+const ROOM = {
+  main: (token: string) => `room:${token}`,
+  host: (token: string) => `room:${token}:host`,
+  user: (token: string, userId: string) => `room:${token}:user:${userId}`,
+};
+
+
+
 @WebSocketGateway({
   cors: { origin: '*' },
 })
@@ -148,18 +156,20 @@ export class SocketGateway
     @MessageBody() data: { roomId: string; isHost: boolean },
     @ConnectedSocket() client: Socket,
   ) {
-    if (data.isHost) {
-      client.join(data.roomId);
-      client.join(`${data.roomId}:host`);
-      return;
+
+    const userId = client.data.userId;
+    if (!userId) {
+      throw new UnauthorizedException();
     }
 
-    this.server.to(`${data.roomId}:host`).emit('join-request', {
-      roomId: data.roomId,
-      userId: client.data.userId,
-      name: client.data.user.firstName,
-    });
+    client.join(ROOM.main(data.roomId));
+    client.join(ROOM.user(data.roomId, userId));
 
+    // host specific room
+    if (data.isHost) {
+      console.log("Host Joined: ", ROOM.host(data.roomId));
+      client.join(ROOM.host(data.roomId));
+    }
   }
 
   @SubscribeMessage('send-message')
@@ -167,35 +177,38 @@ export class SocketGateway
     @MessageBody() data: { roomId: string; message: string },
     @ConnectedSocket() client: Socket,
   ) {
-    const user = client.data.user;
+    const userId = client.data.userId;
     this.server.to(data.roomId).emit('receive-message', {
-      userId: user.id,
+      userId: userId,
       message: data.message,
     });
   }
 
-  handleJoinHost(userId: string, sessionId: Types.ObjectId) {
-    this.server.to(userId).emit('host-join-room', { sessionId });
-  }
-
   handleParticipantJoin(roomToken: string, payload: participantJoinPayload) {
-    this.server.to(`${roomToken}:host`).emit("join-request", payload)
+    this.server.to(ROOM.host(roomToken)).emit("join-request", payload)
   }
 
-  async handleAcceptInvite(roomToken: string, payload: acceptInvitePayload) {
-    const userId = payload.userId.toString();
-    const sockets = this.onlineUsers.get(userId);
+  async handleAcceptInvite(
+    roomToken: string,
+    payload: acceptInvitePayload) {
 
-    if (!sockets || sockets.size === 0) return;
+    const {
+      roomId,
+      userId
+    } = payload;
 
-    this.server.to(userId).emit('invite-accepted', {
+    if (!roomId || !userId) {
+      return;
+    }
+
+    this.server.to(ROOM.user(roomToken, userId.toString())).emit('invite-accepted', {
       roomToken,
       roomId: payload.roomId,
       isHost: payload.isHost,
       sessionId: payload.sessionId
     });
 
-    this.server.to(roomToken).emit("admit-participant", payload);
+    this.server.to(ROOM.main(roomToken)).emit("admit-participant", payload);
   }
 
 
@@ -206,15 +219,14 @@ export class SocketGateway
 
     if (!sockets || sockets.size == 0) return;
 
-    this.server.to(userId).emit('invite-rejected', {
+    this.server.to(ROOM.user(roomToken, userId)).emit('invite-rejected', {
       roomToken
     })
 
   }
 
-
   async handleParticipantLeave(participantLeavePayload: ParticipantLeavePayload) {
-    this.server.to(participantLeavePayload.token).emit("participant-leave", participantLeavePayload);
+    this.server.to(ROOM.main(participantLeavePayload.token)).emit("participant-leave", participantLeavePayload);
   }
 
 }

@@ -51,8 +51,6 @@ export class RoomService {
             expiresAt: dayjs().add(15, 'minute').toDate()
         });
 
-        this.socketGateway.handleJoinHost(hostId.toString(), roomSession._id);
-
         return {
             roomId: room?._id,
             sessionId: roomSession._id
