@@ -21,6 +21,12 @@ export class Participant {
 
     @Prop({ type: Types.ObjectId, ref: 'JoinRequest' })
     joinRequestId: Types.ObjectId
+
+    @Prop({ default: false })
+    mic: boolean
+
+    @Prop({ default: false })
+    camera: boolean
 }
 
 export const ParticipantSchema = SchemaFactory.createForClass(Participant);

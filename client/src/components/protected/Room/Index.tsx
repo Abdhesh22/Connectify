@@ -33,32 +33,47 @@ const Index: React.FC = () => {
     const [joinButtonMessage, setJoinButtonMessage] = useState<string>();
 
     useEffect(() => {
-
         const socket = connectSocket();
 
-        socket.emit("join-room", {
-            roomId: token,
-            isHost: roomSession?.isHost,
-        });
+        if (!socket) return;
 
-        socket.on("invite-accepted", (data: InviteAcceptedResponse) => {
-            setRoomSessionToken(data.sessionId);
-            setJoinButtonMessage("");
-            setRoomSession({
-                sessionId: data.sessionId,
-                isHost: false,
-                isJoined: true
+        const onConnect = () => {
+
+            socket.emit("join-room", {
+                roomId: token,
+                isHost: roomSession?.isHost,
             });
-        })
 
-        socket.on("invite-rejected", () => {
-            setJoinButtonMessage("Join request rejected by the host");
-            setTimeout(() => {
+            socket.on("invite-accepted", (data: InviteAcceptedResponse) => {
+
+                setRoomSession({
+                    sessionId: data.sessionId,
+                    isHost: false,
+                    isJoined: true,
+                });
+
+                setRoomSessionToken(data.sessionId);
                 setJoinButtonMessage("");
-            }, 1000);
-        });
+            });
 
-    }, [roomSession])
+            socket.on("invite-rejected", () => {
+                setJoinButtonMessage("Join request rejected by the host");
+            });
+        };
+
+        // ✅ If already connected, call directly
+        if (socket.connected) {
+            onConnect();
+        } else {
+            socket.once("connect", onConnect);
+        }
+
+        return () => {
+            socket.off("connect", onConnect);
+            socket.off("invite-accepted");
+            socket.off("invite-rejected");
+        };
+    }, [roomSession]);
 
 
     const join = async () => {

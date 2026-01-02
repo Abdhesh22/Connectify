@@ -13,7 +13,7 @@ import { JoinRequest } from '../schema/room-join-request.schema';
 import { JoinRequestListDto } from '../dto/room-join-request.dto';
 import { JoinActionDto } from '../dto/room-join-action.dto';
 import { RoomSessionDto } from '../dto/room-session.dto';
-import { RoomTokenDto } from '../dto/room-token.dto';
+import { ControlDTO } from '../dto/room-control.dto';
 
 @Injectable()
 export class RoomService {
@@ -34,6 +34,7 @@ export class RoomService {
 
     private async joinHost(hostId: Types.ObjectId, token: string) {
 
+        const user = await this.userService.findById(hostId, { firstName: 1, lastName: 1 });
         const room = await this.roomModel.findOne({ token });
         const participant = await this.participantModel.create({
             roomId: room?._id,
@@ -50,6 +51,17 @@ export class RoomService {
             participantId: participant._id,
             expiresAt: dayjs().add(15, 'minute').toDate()
         });
+
+        if (room) {
+            await this.socketGateway.handleHostJoin(token, {
+                roomId: room._id,
+                isHost: true,
+                userId: hostId,
+                name: `${user?.firstName} ${user?.lastName}`,
+                participantId: participant._id,
+                sessionId: roomSession._id
+            });
+        }
 
         return {
             roomId: room?._id,
@@ -194,9 +206,9 @@ export class RoomService {
 
     }
 
-    async rejectInvite(joinActionDto: JoinActionDto, roomTokenDto: RoomTokenDto) {
+    async rejectInvite(joinActionDto: JoinActionDto, roomSessionDto: RoomSessionDto) {
         await this.joinRequestModel.deleteOne({ _id: joinActionDto.joinRequestId });
-        return await this.socketGateway.handleRejectInvite(roomTokenDto.token, {
+        return await this.socketGateway.handleRejectInvite(roomSessionDto.token, {
             userId: joinActionDto.userId
         });
     }
@@ -229,6 +241,8 @@ export class RoomService {
                     roomId: 1,
                     joinedAt: 1,
                     isHost: 1,
+                    isMicOn: 1,
+                    isCamerOn: 1,
                     name: {
                         $concat: ['$user.firstName', ' ', '$user.lastName'],
                     },
@@ -277,6 +291,24 @@ export class RoomService {
         ]);
     }
 
+
+    async handleControl(roomSessionDto: RoomSessionDto, controlDto: ControlDTO) {
+        await this.participantModel.updateOne({
+            _id: roomSessionDto.participantId
+        }, {
+            $set: controlDto
+        })
+
+
+        await this.socketGateway.handleControlChange({
+            token: roomSessionDto.token,
+            userId: roomSessionDto.userId,
+            participantId: roomSessionDto.participantId,
+            mic: controlDto.mic,
+            camera: controlDto.camera
+        });
+
+    }
 
     async getRoom(token: string) {
         return await this.roomModel.findOne({ token });

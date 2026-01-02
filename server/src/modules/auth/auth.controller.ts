@@ -54,6 +54,7 @@ export class AuthController {
     @UseGuards(AuthGuard)
     createSession(@User() user: UserDto) {
         return {
+            userId: user._id,
             firstName: user.firstName,
             lastName: user.lastName,
             email: user.email

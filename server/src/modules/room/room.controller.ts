@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Query, Request, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, Request, UseGuards } from '@nestjs/common';
 import { RoomService } from './service/room.service';
 import { AuthGuard } from '../auth/auth.guard';
 import { RoomPermissionGuard } from './guards/room-permission.guard';
@@ -15,6 +15,7 @@ import { UserDto } from 'src/common/dto/user.dto';
 import { RoomPermission } from './decorator/room-permission.decorator';
 import { RoomPermissionDto } from './dto/room-permission.dto';
 import { RoomSessionBeaconGuard } from './guards/room-session-beacon.guard';
+import { ControlDTO } from './dto/room-control.dto';
 
 
 @Controller('room')
@@ -66,9 +67,10 @@ export class RoomController {
     @UseGuards(AuthGuard, RoomSessionGuard, RoomHostGuard)
     rejectInvite(
         @Body() joinActionDto: JoinActionDto,
-        @Param() roomTokenDto: RoomTokenDto) {
+        @RoomSession() roomSessionDto: RoomSessionDto,
+    ) {
 
-        return this.roomService.rejectInvite(joinActionDto, roomTokenDto);
+        return this.roomService.rejectInvite(joinActionDto, roomSessionDto);
     }
 
     @Post('session')
@@ -94,6 +96,15 @@ export class RoomController {
         @Query() participantListDto: JoinRequestListDto
     ) {
         return this.roomService.joinRequest(participantListDto, roomSessionDto);
+    }
+
+    @Put("control")
+    @UseGuards(AuthGuard, RoomSessionGuard)
+    handleControl(
+        @RoomSession() roomSessionDto: RoomSessionDto,
+        @Body() controlDto: ControlDTO
+    ) {
+        return this.roomService.handleControl(roomSessionDto, controlDto);
     }
 
 }

@@ -9,6 +9,7 @@ import InfiniteScroll from "react-infinite-scroll-component";
 import { useParams } from "react-router-dom";
 import { toasty } from "../../../utils/toasty.util";
 import { TOAST_MESSAGE } from "../../../constants/message.constant";
+import { connectSocket } from "../../../socket";
 
 /* ---------------- TYPES ---------------- */
 type ParticipantPeople = {
@@ -28,6 +29,16 @@ type ParticipantLeavePayload = {
 
 type ParticipantProp = {
     leavedParticipant: ParticipantLeavePayload | undefined
+}
+
+
+type ParticipantAdded = {
+    roomId: string,
+    isHost: boolean,
+    userId: string,
+    name: string,
+    participantId: string,
+    sessionId: string
 }
 
 /* ---------------- COMPONENT ---------------- */
@@ -96,6 +107,41 @@ const Participant: React.FC<ParticipantProp> = ({
         setHasMore(true);
         fetchParticipants(false);
     }, [token]);
+
+    useEffect(() => {
+        const socket = connectSocket();
+        if (!socket) return;
+
+        const onConnect = () => {
+
+            const onHostJoin = (payload: ParticipantAdded) => {
+                const hostParticipant: ParticipantPeople = {
+                    userId: payload.userId,
+                    name: payload.name,
+                    isHost: payload.isHost,
+                    mic: false,
+                    camera: false,
+                    _id: payload.participantId
+                }
+                setParticipants(prev => [hostParticipant, ...prev]);
+            }
+
+            socket.on("host-join", onHostJoin)
+
+        };
+
+        // ✅ Handle already-connected case
+        if (socket.connected) {
+            onConnect();
+        } else {
+            socket.once("connect", onConnect);
+        }
+
+        return () => {
+            socket.off("connect", onConnect);
+            socket.off("host-join");
+        };
+    }, []);
 
     /* ---------------- UI STATES ---------------- */
 

@@ -1,5 +1,4 @@
-import React, { useState } from "react";
-import Chat from "./Chat";
+import React, { useEffect, useState } from "react";
 import Participant from "./Participant";
 import JoinRequest from "./JoinRequest";
 import ParticipantWidget from "./ParticipantWidget";
@@ -8,7 +7,8 @@ import { useParams } from "react-router-dom";
 import { useNotificationSound } from "../../common-components/Notification/UseNotificationSound";
 import { useStore } from "../../provider/store.hooks";
 import { toasty } from "../../../utils/toasty.util";
-
+import axios, { AxiosError } from "axios";
+import { TOAST_MESSAGE } from "../../../constants/message.constant";
 
 type RequestPeople = {
     userId: string,
@@ -37,6 +37,11 @@ type ParticipantLeavePayload = {
     participantId: string;
 }
 
+type ControlPayload = {
+    mic?: boolean,
+    camera?: boolean
+}
+
 type TabType = "participants" | "requests";
 
 
@@ -63,34 +68,72 @@ const Room: React.FC<RoomProps> = ({ isHost, handleLeaveRoom }) => {
     const [acceptedRequest, setAcceptedRequest] = useState<ParticipantPeople>();
     const [joinRequests, setJoinRequests] = useState<RequestPeople[]>([]);
     const [requestCount, setRequestCount] = useState(0);
-    const socket = connectSocket();
 
-    socket.on("join-request", (data: RequestPeople) => {
-        if (control.people) {
-            if (activeTab == 'requests') {
-                setJoinRequests([data]);
-            }
+
+    useEffect(() => {
+        const socket = connectSocket();
+        if (!socket) return;
+
+        const onConnect = () => {
+
+            const onJoinRequest = (data: RequestPeople) => {
+                if (control.people) {
+                    if (activeTab === "requests") {
+                        setJoinRequests([data]);
+                    }
+                } else {
+                    setRequestCount(prev => prev + 1);
+                }
+                playJoinSound();
+            };
+
+            const onAdmitParticipant = (data: ParticipantPeople) => {
+                if (control.people && activeTab === "requests") {
+                    setAcceptedRequest(data);
+                }
+            };
+
+            const onParticipantLeave = (data: ParticipantLeavePayload) => {
+                setLeavedParticipant(data);
+                playLeaveSound();
+            };
+
+            socket.on("join-request", onJoinRequest);
+            socket.on("admit-participant", onAdmitParticipant);
+            socket.on("participant-leave", onParticipantLeave);
+        };
+
+        // ✅ Handle already-connected case
+        if (socket.connected) {
+            onConnect();
         } else {
-            setRequestCount(prev => prev + 1);
+            socket.once("connect", onConnect);
         }
-        playJoinSound();
-    });
 
-    socket.on("admit-participant", (data: ParticipantPeople) => {
-        if (control.people && activeTab == 'requests') {
-            setAcceptedRequest(data);
+        return () => {
+            socket.off("connect", onConnect);
+            socket.off("join-request");
+            socket.off("admit-participant");
+            socket.off("participant-leave");
+        };
+    }, []);
+
+
+
+    const handleControlChange = async (payload: ControlPayload) => {
+        try {
+            const response = await axios.put('/api/room/control', { ...payload });
+        } catch (error) {
+            const err = error as AxiosError<{ message?: string }>;
+            toasty.error(err?.response?.data?.message || TOAST_MESSAGE.ERROR)
         }
-    });
-
-    socket.on("participant-leave", (data: ParticipantLeavePayload) => {
-        setLeavedParticipant(data);
-        playLeaveSound();
-    });
+    }
 
 
     const handleControl = (key: string) => {
         switch (key) {
             case 'mic':
+                handleControlChange({ ...control, mic: !control.mic });
                 setControl(prev => {
                     return {
                         ...prev,
@@ -99,6 +142,7 @@ const Room: React.FC<RoomProps> = ({ isHost, handleLeaveRoom }) => {
                 })
                 break;
             case 'camera':
+                handleControlChange({ ...control, camera: !control.camera });
                 setControl(prev => {
                     return {
                         ...prev,
@@ -188,7 +232,10 @@ const Room: React.FC<RoomProps> = ({ isHost, handleLeaveRoom }) => {
                     {/* Video section */}
                     <section className="meet-stage">
                         <div className={`participant-grid ${control.chat || control.people ? "right-panel-open" : ""}`}>
-                            <ParticipantWidget />
+                            <ParticipantWidget
+                                mic={control.mic}
+                                camera={control.camera}
+                            />
                         </div>
                         {/* Bottom controls */}
                         <div className="meet-controls">

@@ -6,6 +6,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import smtpConfig from './config/smtp.config';
 import { RoomModule } from './modules/room/room.module';
 import { SocketModule } from './modules/socket/socket.module';
+import { MediasoupModule } from './modules/mediasoup/mediasoup.module';
 
 @Module({
   imports: [
@@ -23,7 +24,8 @@ import { SocketModule } from './modules/socket/socket.module';
     }),
     AuthModule,
     RoomModule,
-    SocketModule
+    SocketModule,
+    MediasoupModule
   ],
 })
 export class AppModule { }
