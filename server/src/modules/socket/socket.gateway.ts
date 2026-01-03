@@ -240,6 +240,8 @@ export class SocketGateway
     @MessageBody() { roomToken },
     @ConnectedSocket() client: Socket,
   ) {
+
+    client.data.sfuRoomToken = roomToken;
     const userId = client.data.userId;
     if (!userId) throw new UnauthorizedException();
 
@@ -252,10 +254,31 @@ export class SocketGateway
       consumers: new Map(),
     });
 
+    // 🔥 COLLECT EXISTING PRODUCERS
+    const existingProducers: {
+      producerId: string;
+      userId: string;
+      kind: string;
+    }[] = [];
+
+    for (const [socketId, peer] of room.peers) {
+      if (socketId === client.id) continue;
+
+      for (const producer of peer.producers.values()) {
+        existingProducers.push({
+          producerId: producer.id,
+          userId: peer.userId,
+          kind: producer.kind,
+        });
+      }
+    }
+
     return {
       rtpCapabilities: room.router.rtpCapabilities,
+      existingProducers,
     };
   }
+
 
 
   @SubscribeMessage('sfu:create-transport')
@@ -437,5 +460,56 @@ export class SocketGateway
 
     await consumer.resume();
   }
+
+
+  @SubscribeMessage("sfu:pause-producer")
+  async pauseProducer(
+    @MessageBody()
+    { roomToken, producerId }: { roomToken: string; producerId: string },
+    @ConnectedSocket() socket: Socket
+  ) {
+    const room = await this.mediasoupRoomMap.getRoom(roomToken);
+    const peer = room.peers.get(socket.id);
+    if (!peer) return;
+
+    const producer = peer.producers.get(producerId);
+    if (!producer) return;
+
+    producer.pause();
+
+    // 🔥 Notify ALL other peers
+    this.server.to(ROOM.main(roomToken)).emit("sfu:producer-paused", {
+      userId: peer.userId,
+      producerId,
+      kind: producer.kind
+    });
+
+  }
+
+
+  @SubscribeMessage("sfu:resume-producer")
+  async resumeProducer(
+    @MessageBody()
+    { roomToken, producerId }: { roomToken: string; producerId: string },
+    @ConnectedSocket() socket: Socket
+  ) {
+    const room = await this.mediasoupRoomMap.getRoom(roomToken);
+    const peer = room.peers.get(socket.id);
+    if (!peer) return;
+
+    const producer = peer.producers.get(producerId);
+    if (!producer) return;
+
+    producer.resume();
+
+    // 🔥 Notify ALL other peers
+    this.server.to(ROOM.main(roomToken)).emit("sfu:producer-resumed", {
+      userId: peer.userId,
+      producerId,
+      kind: producer.kind
+    });
+
+  }
+
 
 }

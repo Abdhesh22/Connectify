@@ -57,6 +57,15 @@ const ParticipantWidget: React.FC<Props> = ({ mic, camera }) => {
 
     const audioProducerRef = useRef<any>(null);
     const videoProducerRef = useRef<any>(null);
+
+    const audioMixStreamRef = useRef<MediaStream>(new MediaStream());
+
+    const recvTransportReadyRef = useRef<Promise<void> | null>(null);
+    const resolveRecvReadyRef = useRef<(() => void) | null>(null);
+
+    const consumedProducersRef = useRef<Set<string>>(new Set());
+
+
     /* ---------- STATE ---------- */
 
     const [participants, setParticipants] = useState<VideoParticipant[]>([]);
@@ -140,30 +149,70 @@ const ParticipantWidget: React.FC<Props> = ({ mic, camera }) => {
             joined = true;
 
             console.log("✅ Socket connected, joining SFU room");
-
             socket.emit(
                 "sfu:join",
                 { roomToken: token },
-                async ({ rtpCapabilities }) => {
-                    console.log("line 134");
+                async ({ rtpCapabilities, existingProducers }) => {
 
                     deviceRef.current = new mediasoupClient.Device();
                     await deviceRef.current.load({
                         routerRtpCapabilities: rtpCapabilities,
                     });
 
-                    // ensure device is ready before transports
-                    await Promise.resolve();
-
                     await createSendTransport();
                     await createRecvTransport();
+
+                    // 🔥 CONSUME EXISTING PRODUCERS (screen share, cam, audio)
+                    for (const p of existingProducers) {
+                        consume(p.producerId, p.userId);
+                    }
                 }
             );
 
+
             socket.on("sfu:new-producer", ({ producerId, userId }) => {
-                console.log("line 147");
                 consume(producerId, userId);
             });
+
+            socket.on("sfu:producer-paused", ({ producerId, userId, kind }) => {
+
+                // 🎤 AUDIO PAUSED → REMOVE AUDIO TRACK
+                if (kind === "audio") {
+                    audioMixStreamRef.current.getTracks().forEach(track => {
+                        if (track.id === producerId) {
+                            audioMixStreamRef.current.removeTrack(track);
+                        }
+                    });
+                }
+
+                // 🎥 VIDEO PAUSED → REMOVE STREAM → AVATAR
+                if (kind === "video") {
+                    setParticipants(prev =>
+                        prev.map(p =>
+                            p.userId === userId
+                                ? { ...p, stream: undefined }
+                                : p
+                        )
+                    );
+                }
+            });
+
+
+            socket.on("sfu:producer-resumed", ({ producerId, userId, kind }) => {
+
+                // 🎤 AUDIO RESUME → CONSUME AGAIN
+                if (kind === "audio") {
+                    consume(producerId, userId);
+                }
+
+                // 🎥 VIDEO RESUME → CONSUME AGAIN
+                if (kind === "video") {
+                    consume(producerId, userId);
+                }
+            });
+
+
+
         };
 
         // ✅ Handle both cases
@@ -177,10 +226,23 @@ const ParticipantWidget: React.FC<Props> = ({ mic, camera }) => {
             socket.off("connect", onConnect);
             socket.off("sfu:new-producer");
 
+            // 🔴 CLOSE PRODUCERS (VERY IMPORTANT)
             audioProducerRef.current?.close();
             videoProducerRef.current?.close();
+            audioProducerRef.current = null;
+            videoProducerRef.current = null;
+
+            // 🔴 STOP HARDWARE (RELEASE MIC & CAMERA)
+            audioStreamRef.current?.getTracks().forEach(t => t.stop());
+            videoStreamRef.current?.getTracks().forEach(t => t.stop());
+            audioStreamRef.current = null;
+            videoStreamRef.current = null;
+
+            // 🔴 CLOSE TRANSPORTS
             sendTransportRef.current?.close();
             recvTransportRef.current?.close();
+            sendTransportRef.current = null;
+            recvTransportRef.current = null;
 
             joined = false;
         };
@@ -217,139 +279,185 @@ const ParticipantWidget: React.FC<Props> = ({ mic, camera }) => {
             });
         });
     };
-
     const createRecvTransport = async () => {
         const socket = socketRef.current!;
         const device = deviceRef.current!;
 
+        recvTransportReadyRef.current = new Promise<void>(resolve => {
+            resolveRecvReadyRef.current = resolve;
+        });
+
         socket.emit("sfu:create-transport", { roomToken: token }, params => {
-            console.log("line 195");
             recvTransportRef.current = device.createRecvTransport(params);
 
-            recvTransportRef.current.on("connect", ({ dtlsParameters }: any, cb: any) => {
-                console.log("line 199");
-                socket.emit("sfu:connect-transport", {
-                    roomToken: token,
-                    transportId: recvTransportRef.current.id,
-                    dtlsParameters,
-                });
-                cb();
-            });
+            recvTransportRef.current.on(
+                "connect",
+                ({ dtlsParameters }: any, cb: any) => {
+                    socket.emit("sfu:connect-transport", {
+                        roomToken: token,
+                        transportId: recvTransportRef.current.id,
+                        dtlsParameters,
+                    });
+                    cb();
+                }
+            );
+
+            // 🔥 MARK AS READY
+            resolveRecvReadyRef.current?.();
         });
     };
 
 
     /* ================= PRODUCER SYNC ================= */
 
-    const syncProducers = async () => {
-        if (!sendTransportRef.current) return;
-
-
-
-        /* ================= AUDIO ================= */
-        if (mic) {
-            if (!audioStreamRef.current) {
-                audioStreamRef.current = await navigator.mediaDevices.getUserMedia({
-                    audio: {
-                        echoCancellation: true,
-                        noiseSuppression: true,
-                        autoGainControl: true,
-                        channelCount: 1,
-                        sampleRate: 48000,
-                        sampleSize: 16,
-                    },
-                    video: false,
-                });
-            }
-
-            const audioTrack = audioStreamRef.current.getAudioTracks()[0];
-
-            if (!audioProducerRef.current) {
-                audioProducerRef.current =
-                    await sendTransportRef.current.produce({
-                        track: audioTrack,
-                        codecOptions: {
-                            opusFec: true,
-                            opusDtx: true,
-                            opusPtime: 20,
-                            opusMaxPlaybackRate: 48000,
-                        },
-                    });
-
-                // 🔥 IMPORTANT: set stable bitrate
-                audioProducerRef.current.setMaxBitrate?.(64000);
-            }
-
-            // ✅ SAFE MUTE / UNMUTE
-            audioTrack.enabled = true;
-        } else {
-            // ❌ DO NOT pause producer
-            audioStreamRef.current?.getAudioTracks().forEach(track => {
-                track.enabled = false;
-            });
-        }
-
-
-        /* ================= VIDEO ================= */
-
-        if (camera) {
-            videoStreamRef.current = await navigator.mediaDevices.getUserMedia({
-                video: true,
-                audio: false,
-            });
-
-            const videoTrack = videoStreamRef.current.getVideoTracks()[0];
-
-            if (videoProducerRef.current) {
-                videoProducerRef.current.close();
-                videoProducerRef.current = null;
-            }
-
-            videoProducerRef.current =
-                await sendTransportRef.current.produce({ track: videoTrack });
-
-            // local preview
-            setParticipants(prev =>
-                prev.map(p =>
-                    p.userId === store?.userId
-                        ? { ...p, stream: videoStreamRef.current! }
-                        : p
-                )
-            );
-        } else {
-            if (videoProducerRef.current) {
-                videoProducerRef.current.close();
-                videoProducerRef.current = null;
-            }
-
-            videoStreamRef.current?.getTracks().forEach(t => t.stop());
-            videoStreamRef.current = null;
-
-            setParticipants(prev =>
-                prev.map(p =>
-                    p.userId === store?.userId
-                        ? { ...p, stream: undefined }
-                        : p
-                )
-            );
-        }
-    };
 
 
 
 
     /* ================= TOGGLE HANDLER ================= */
+    useEffect(() => {
+        if (!sendTransportRef.current) return;
+
+        const syncAudio = async () => {
+            // 🟢 MIC ON
+            if (mic) {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    audio: {
+                        echoCancellation: true,
+                        noiseSuppression: true,
+                        autoGainControl: true,
+                    },
+                    video: false,
+                });
+
+                const track = stream.getAudioTracks()[0];
+                audioStreamRef.current = stream;
+
+                if (!audioProducerRef.current) {
+                    audioProducerRef.current =
+                        await sendTransportRef.current.produce({
+                            track,
+                            codecOptions: { opusFec: true, opusDtx: true },
+                        });
+                } else {
+                    await audioProducerRef.current.replaceTrack({ track });
+                    await audioProducerRef.current.resume();
+                }
+
+                socketRef.current?.emit("sfu:resume-producer", {
+                    roomToken: token,
+                    producerId: audioProducerRef.current.id,
+                });
+            }
+
+            // 🔴 MIC OFF
+            else {
+                if (audioProducerRef.current) {
+                    await audioProducerRef.current.pause();
+
+                    socketRef.current?.emit("sfu:pause-producer", {
+                        roomToken: token,
+                        producerId: audioProducerRef.current.id,
+                    });
+                }
+
+                audioStreamRef.current?.getTracks().forEach(t => t.stop());
+                audioStreamRef.current = null;
+            }
+        };
+
+        syncAudio();
+    }, [mic]);
+
+
+
 
     useEffect(() => {
-        syncProducers();
-    }, [mic, camera]);
+        if (!sendTransportRef.current) return;
 
-    /* ================= CONSUME ================= */
+        const syncVideo = async () => {
+            // 🟢 CAMERA ON
+            if (camera) {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: true,
+                    audio: false,
+                });
+
+                const track = stream.getVideoTracks()[0];
+                videoStreamRef.current = stream;
+
+                if (!videoProducerRef.current) {
+                    videoProducerRef.current =
+                        await sendTransportRef.current.produce({ track });
+                } else {
+                    await videoProducerRef.current.replaceTrack({ track });
+                    await videoProducerRef.current.resume();
+                }
+
+                socketRef.current?.emit("sfu:resume-producer", {
+                    roomToken: token,
+                    producerId: videoProducerRef.current.id,
+                });
+
+                // local preview
+                setParticipants(prev =>
+                    prev.map(p =>
+                        p.userId === store?.userId
+                            ? { ...p, stream }
+                            : p
+                    )
+                );
+            }
+
+            // 🔴 CAMERA OFF
+            else {
+                if (videoProducerRef.current) {
+                    await videoProducerRef.current.pause();
+
+                    socketRef.current?.emit("sfu:pause-producer", {
+                        roomToken: token,
+                        producerId: videoProducerRef.current.id,
+                    });
+                }
+
+                videoStreamRef.current?.getTracks().forEach(t => t.stop());
+                videoStreamRef.current = null;
+
+                setParticipants(prev =>
+                    prev.map(p =>
+                        p.userId === store?.userId
+                            ? { ...p, stream: undefined }
+                            : p
+                    )
+                );
+            }
+        };
+
+        syncVideo();
+    }, [camera]);
+
+
+
 
     const consume = async (producerId: string, userId: string) => {
+
+        if (consumedProducersRef.current.has(producerId)) return;
+        consumedProducersRef.current.add(producerId);
+
+        // ⛔ WAIT until recv transport exists
+        if (recvTransportReadyRef.current) {
+            await recvTransportReadyRef.current;
+        }
+
         const socket = socketRef.current!;
         const device = deviceRef.current!;
         const transport = recvTransportRef.current;
+
+        if (!transport) {
+            console.warn("Recv transport not ready yet");
+            consumedProducersRef.current.delete(producerId);
+            return;
+        }
 
         socket.emit(
             "sfu:consume",
@@ -364,19 +472,19 @@ const ParticipantWidget: React.FC<Props> = ({ mic, camera }) => {
 
                 const stream = new MediaStream([consumer.track]);
 
+                /* ================= AUDIO ================= */
                 if (consumer.kind === "audio") {
-                    // 🔥 AUDIO PLAYBACK FIX
-                    if (audioElRef.current) {
-                        audioElRef.current.srcObject = stream;
+                    audioMixStreamRef.current.addTrack(consumer.track);
 
+                    if (audioElRef.current) {
+                        audioElRef.current.srcObject = audioMixStreamRef.current;
                         try {
                             await audioElRef.current.play();
-                        } catch (e) {
-                            console.warn("Audio autoplay blocked", e);
-                        }
+                        } catch { }
                     }
                 }
 
+                /* ================= VIDEO ================= */
                 if (consumer.kind === "video") {
                     setParticipants(prev =>
                         prev.map(p =>
@@ -384,6 +492,28 @@ const ParticipantWidget: React.FC<Props> = ({ mic, camera }) => {
                         )
                     );
                 }
+
+                // 🔥 PRODUCER CLOSED (USER LEFT / STREAM DESTROYED)
+                consumer.on("producerclose", () => {
+
+                    // audio cleanup
+                    if (consumer.kind === "audio") {
+                        audioMixStreamRef.current.removeTrack(consumer.track);
+                    }
+
+                    // video cleanup → avatar
+                    if (consumer.kind === "video") {
+                        setParticipants(prev =>
+                            prev.map(p =>
+                                p.userId === userId
+                                    ? { ...p, stream: undefined }
+                                    : p
+                            )
+                        );
+                    }
+
+                    consumedProducersRef.current.delete(producerId);
+                });
 
                 socket.emit("sfu:resume-consumer", {
                     roomToken: token,

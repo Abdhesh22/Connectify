@@ -19,42 +19,29 @@ const VideoTile: React.FC<VideoTileProps> = ({ participant }) => {
     const { store } = useStore();
     const videoRef = useRef<HTMLVideoElement>(null);
 
-    /* ---------------- VIDEO ATTACH ---------------- */
-
     useEffect(() => {
         const videoEl = videoRef.current;
-        if (!videoEl || !participant.stream) return;
+        if (!videoEl) return;
+
+        if (!participant.stream) {
+            videoEl.srcObject = null;
+            return;
+        }
 
         videoEl.srcObject = participant.stream;
-
-        const play = async () => {
-            try {
-                await videoEl.play();
-            } catch {
-                // autoplay fallback
-                videoEl.muted = true;
-                await videoEl.play();
-            }
-        };
-
-        play();
-
-        return () => {
-            videoEl.srcObject = null;
-        };
+        videoEl.play().catch(() => {
+            videoEl.muted = true;
+            videoEl.play();
+        });
     }, [participant.stream]);
-
-
-
-    /* ---------------- RENDER ---------------- */
 
     return (
         <div className="video-tile modern-tile">
-            {/* ================= VIDEO / AVATAR ================= */}
             <div className="video-content">
                 {participant.stream ? (
                     <div className="camera-container">
                         <video
+                            key={participant.stream.id}   // 🔥 MUST
                             ref={videoRef}
                             autoPlay
                             playsInline
@@ -64,20 +51,20 @@ const VideoTile: React.FC<VideoTileProps> = ({ participant }) => {
                     </div>
                 ) : (
                     <div className="avatar-wrapper">
-                        <div className="avatar-circle">{participant.name.charAt(0).toUpperCase()}</div>
+                        <div className="avatar-circle">
+                            {participant.name.charAt(0).toUpperCase()}
+                        </div>
                     </div>
                 )}
             </div>
 
-            {/* ================= FOOTER ================= */}
             <div className="video-footer">
                 <div className="video-name">
-                    {store?.userId == participant.userId ? "You" : participant.name}
+                    {store?.userId === participant.userId ? "You" : participant.name}
                 </div>
 
                 <span
-                    className={`status-badge ${participant.mic ? "mic-on" : "mic-off"
-                        }`}
+                    className={`status-badge ${participant.mic ? "mic-on" : "mic-off"}`}
                 >
                     {participant.mic ? "Mic On" : "Mic Off"}
                 </span>
@@ -85,5 +72,6 @@ const VideoTile: React.FC<VideoTileProps> = ({ participant }) => {
         </div>
     );
 };
+
 
 export default VideoTile;
