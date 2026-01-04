@@ -18,6 +18,7 @@ export default defineConfig(({ mode }) => {
       port: Number(env.CONFIG_SERVER_PORT) || 5173,
       open: env.CONFIG_SERVER_OPEN === "true",
       allowedHosts: [env.CONFIG_ALLOWED_HOST],
+      strictPort: true,
       proxy: {
         "/api": {
           target: env.CONFIG_SERVER_PROXY,

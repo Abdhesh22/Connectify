@@ -58,9 +58,14 @@ const ROOM = {
 };
 
 
-
 @WebSocketGateway({
-  cors: { origin: '*' },
+  cors: {
+    origin: [
+      "http://localhost",
+      "https://connectify-mc8y.onrender.com",
+    ],
+    credentials: true,
+  },
 })
 export class SocketGateway
   implements OnGatewayConnection, OnGatewayDisconnect {

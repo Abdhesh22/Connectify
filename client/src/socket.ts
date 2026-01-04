@@ -1,11 +1,12 @@
 import { io, Socket } from "socket.io-client";
+import { BACKEND_URL } from "./config/backend";
 
 let socket: Socket | null = null;
 
 export const connectSocket = (): Socket => {
     if (!socket) {
         const token = localStorage.getItem("access_token");
-        socket = io("http://localhost:3000", {
+        socket = io(BACKEND_URL, {
             auth: {
                 token
             }

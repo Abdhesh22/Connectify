@@ -4,10 +4,11 @@ import axios, {
     type InternalAxiosRequestConfig
 } from "axios";
 import { getRoomSessionToken } from "./components/provider/room-session.store";
+import { BACKEND_URL } from "./config/backend";
 
 /* ---------------- AXIOS DEFAULTS ---------------- */
-
-axios.defaults.baseURL = window.location.origin;
+// src/config/backend.ts
+axios.defaults.baseURL = BACKEND_URL
 axios.defaults.headers.common["Content-Type"] = "application/json";
 
 /* ---------------- REQUEST INTERCEPTOR ---------------- */

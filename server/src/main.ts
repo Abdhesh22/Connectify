@@ -12,7 +12,21 @@ async function bootstrap() {
       whitelist: true,
     }),
   );
-
+  app.enableCors({
+    origin: [
+      "http://localhost",
+      "http://localhost:5173",
+      "http://localhost:3000",
+      "https://connectify-mc8y.onrender.com",
+    ],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: [
+      "Content-Type",
+      "Authorization",
+      "X-Room-Session",
+    ],
+    credentials: true,
+  });
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();
