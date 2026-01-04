@@ -12,6 +12,8 @@ async function bootstrap() {
       whitelist: true,
     }),
   );
+  // main.ts
+  app.setGlobalPrefix("api");
   app.enableCors({
     origin: [
       "http://localhost",
