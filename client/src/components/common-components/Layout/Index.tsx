@@ -3,12 +3,22 @@ import Header from "./Header";
 import SideNav from "./SideNav";
 import type React from "react";
 
+
+type RouteHandle = {
+    showSideNav?: boolean;
+    showHeader?: boolean;
+};
+
+
+
+
+
 const Index: React.FC = () => {
     const matches = useMatches();
     const currentRoute = matches[matches.length - 1];
 
-    const showSideNav = currentRoute?.handle?.showSideNav ?? false;
-    const showHeader = currentRoute?.handle?.showHeader ?? false;
+    const showSideNav = (currentRoute?.handle as RouteHandle)?.showSideNav ?? false;
+    const showHeader = (currentRoute?.handle as RouteHandle)?.showHeader ?? false;
 
     return (
         <div className="app-layout d-flex flex-column min-vh-100">

@@ -9,6 +9,7 @@ import { connectSocket } from "../../../socket";
 import { useStore } from "../../provider/store.hooks";
 import type { Socket } from "socket.io-client";
 import * as mediasoupClient from "mediasoup-client";
+import type { RtpCapabilities, TransportOptions } from "mediasoup-client/types";
 
 /* ================= TYPES ================= */
 
@@ -36,10 +37,17 @@ type ParticipantPeople = {
     _id: string;
 };
 
+type ExistingProducer = {
+    producerId: string;
+    userId: string;
+    kind: "audio" | "video";
+}
+
 /* ================= COMPONENT ================= */
 
 const ParticipantWidget: React.FC<Props> = ({ mic, camera }) => {
     const { store } = useStore();
+    console.log("store: ", store);
     const { token } = useParams<{ token: string }>();
 
     /* ---------- REFS ---------- */
@@ -152,7 +160,10 @@ const ParticipantWidget: React.FC<Props> = ({ mic, camera }) => {
             socket.emit(
                 "sfu:join",
                 { roomToken: token },
-                async ({ rtpCapabilities, existingProducers }) => {
+                async ({ rtpCapabilities, existingProducers }: {
+                    rtpCapabilities: RtpCapabilities,
+                    existingProducers: ExistingProducer[]
+                }) => {
 
                     deviceRef.current = new mediasoupClient.Device();
                     await deviceRef.current.load({
@@ -255,7 +266,7 @@ const ParticipantWidget: React.FC<Props> = ({ mic, camera }) => {
         const socket = socketRef.current!;
         const device = deviceRef.current!;
 
-        socket.emit("sfu:create-transport", { roomToken: token }, params => {
+        socket.emit("sfu:create-transport", { roomToken: token }, (params: TransportOptions) => {
             console.log("line 165");
             sendTransportRef.current = device.createSendTransport(params);
 
@@ -287,7 +298,7 @@ const ParticipantWidget: React.FC<Props> = ({ mic, camera }) => {
             resolveRecvReadyRef.current = resolve;
         });
 
-        socket.emit("sfu:create-transport", { roomToken: token }, params => {
+        socket.emit("sfu:create-transport", { roomToken: token }, (params: TransportOptions) => {
             recvTransportRef.current = device.createRecvTransport(params);
 
             recvTransportRef.current.on(

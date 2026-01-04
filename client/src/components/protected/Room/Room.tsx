@@ -122,7 +122,7 @@ const Room: React.FC<RoomProps> = ({ isHost, handleLeaveRoom }) => {
 
     const handleControlChange = async (payload: ControlPayload) => {
         try {
-            const response = await axios.put('/api/room/control', { ...payload });
+            await axios.put('/api/room/control', { ...payload });
         } catch (error) {
             const err = error as AxiosError<{ message?: string }>;
             toasty.error(err?.response?.data?.message || TOAST_MESSAGE.ERROR)
