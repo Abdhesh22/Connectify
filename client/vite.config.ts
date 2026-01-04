@@ -14,6 +14,7 @@ export default defineConfig(({ mode }) => {
     ],
     envPrefix: "APP_",
     server: {
+      host: true,
       port: Number(env.CONFIG_SERVER_PORT) || 5173,
       open: env.CONFIG_SERVER_OPEN === "true",
       strictPort: true,
